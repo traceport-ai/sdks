@@ -1,0 +1,13 @@
+{
+  // Compiles the examples against the package sources, exactly as users import the packages.
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@traceport/core": ["../packages/core/src/index.ts"],
+      "@traceport/core/internal": ["../packages/core/src/internal.ts"],
+      "@traceport/workflows": ["../packages/workflows/src/index.ts"]
+    }
+  },
+  "include": ["."]
+}

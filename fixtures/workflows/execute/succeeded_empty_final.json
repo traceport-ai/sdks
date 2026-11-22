@@ -1,0 +1,143 @@
+{
+  "name": "workflows.execute.succeeded_empty_final",
+  "description": "Recorded successful execution without End mappings; empty final falls back to the complete node-data map.",
+  "operation": "executeWorkflow",
+  "source": {
+    "from": "Local Traceport Docker API at http://127.0.0.1:1010; synthetic provider-free Start/Transform/End workflows. Runtime OpenAPI matches traceport-apis@aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8.",
+    "recordedAt": "2026-11-13T13:21:39.776395Z",
+    "capture": "live-http",
+    "serverSpecSha256": "79cc9342ee72408734a729330457e175a2c81751c607494e2cb97d1409bd83f5",
+    "kind": "recorded"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/workflow/execute",
+    "headers": {
+      "Idempotency-Key": "fixture-exec-1"
+    },
+    "body": {
+      "configVersionID": "00000000-0000-4000-8000-000000000001",
+      "additional": {
+        "question": "SDK fixture answer",
+        "payload": {}
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": {
+        "data": {
+          "agent": {},
+          "api_connector": {},
+          "branch": {},
+          "final": {},
+          "guardrail": {},
+          "input": {
+            "payload": {},
+            "question": "SDK fixture answer"
+          },
+          "mcp_tool": {},
+          "router": {},
+          "transform": {
+            "prepare": {
+              "result": {
+                "answer": "SDK fixture answer"
+              }
+            }
+          }
+        },
+        "error": "",
+        "steps": [
+          {
+            "index": 0,
+            "nodeId": "Start",
+            "name": "Start",
+            "type": "start",
+            "attempt": 1,
+            "status": "completed",
+            "startedAt": "2026-11-13T13:21:39.780502293Z",
+            "durationMs": 0,
+            "input": {
+              "input": {
+                "payload": {},
+                "question": "SDK fixture answer"
+              }
+            },
+            "output": {
+              "payload": {},
+              "question": "SDK fixture answer"
+            }
+          },
+          {
+            "index": 1,
+            "nodeId": "00000000-0000-4000-8000-000000000003",
+            "name": "prepare",
+            "type": "transform",
+            "attempt": 1,
+            "status": "completed",
+            "startedAt": "2026-11-13T13:21:39.780567918Z",
+            "durationMs": 0,
+            "input": {
+              "answer": "SDK fixture answer"
+            },
+            "output": {
+              "answer": "SDK fixture answer"
+            },
+            "previousNodeIds": [
+              "Start"
+            ]
+          },
+          {
+            "index": 2,
+            "nodeId": "00000000-0000-4000-8000-000000000004",
+            "name": "end",
+            "type": "end",
+            "attempt": 1,
+            "status": "completed",
+            "startedAt": "2026-11-13T13:21:39.780600918Z",
+            "durationMs": 0,
+            "input": {},
+            "output": {},
+            "previousNodeIds": [
+              "00000000-0000-4000-8000-000000000003"
+            ]
+          }
+        ]
+      },
+      "error": "",
+      "status": 200,
+      "errorCode": ""
+    }
+  },
+  "expect": {
+    "kind": "outcome",
+    "outcome": {
+      "status": "succeeded",
+      "output": {
+        "agent": {},
+        "api_connector": {},
+        "branch": {},
+        "final": {},
+        "guardrail": {},
+        "input": {
+          "payload": {},
+          "question": "SDK fixture answer"
+        },
+        "mcp_tool": {},
+        "router": {},
+        "transform": {
+          "prepare": {
+            "result": {
+              "answer": "SDK fixture answer"
+            }
+          }
+        }
+      },
+      "stepCount": 3
+    }
+  }
+}

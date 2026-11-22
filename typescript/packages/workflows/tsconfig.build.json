@@ -1,0 +1,6 @@
+{
+  // Used by tsup to emit declarations. Other @traceport packages resolve to their built output
+  // (through node_modules), so their declarations are referenced, never inlined.
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"]
+}

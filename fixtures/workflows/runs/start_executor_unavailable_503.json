@@ -1,0 +1,48 @@
+{
+  "name": "workflows.runs.start.executor_unavailable_503",
+  "description": "The executor is starting or shutting down. Retryable with the same key; honor Retry-After.",
+  "operation": "startWorkflowRun",
+  "source": {
+    "from": "traceport-apis@aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8: separate local HTTP process with real API-key auth, repositories and config/execution usecases; dispatcher deliberately unstarted. Main API not stopped.",
+    "recordedAt": "2026-11-13T13:26:21.276988Z",
+    "capture": "isolated-backend-http",
+    "backendCommit": "aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8",
+    "kind": "recorded"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/workflow/runs",
+    "headers": {
+      "Idempotency-Key": "fixture-start-1"
+    },
+    "body": {
+      "configVersionID": "00000000-0000-4000-8000-000000000001",
+      "additional": {
+        "question": "SDK fixture answer",
+        "payload": {}
+      }
+    }
+  },
+  "response": {
+    "status": 503,
+    "headers": {
+      "Content-Type": "application/json",
+      "Retry-After": "1"
+    },
+    "body": {
+      "data": null,
+      "error": "workflow execution is unavailable or shutting down; retry shortly",
+      "status": 503,
+      "errorCode": "workflow_executor_unavailable"
+    }
+  },
+  "expect": {
+    "kind": "error",
+    "error": {
+      "class": "InternalServerError",
+      "status": 503,
+      "errorCode": "workflow_executor_unavailable",
+      "retryable": true
+    }
+  }
+}

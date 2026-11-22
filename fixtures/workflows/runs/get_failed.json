@@ -1,0 +1,157 @@
+{
+  "name": "workflows.runs.get.failed",
+  "description": "Recorded runtime End-expression failure after a successful Transform. HTTP 200 retains partial input/Transform data and all executed steps.",
+  "operation": "getWorkflowRun",
+  "source": {
+    "from": "Local Traceport Docker API at http://127.0.0.1:1010; synthetic provider-free Start/Transform/End workflows. Runtime OpenAPI matches traceport-apis@aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8.",
+    "recordedAt": "2026-11-13T13:21:39.844005Z",
+    "capture": "live-http",
+    "serverSpecSha256": "79cc9342ee72408734a729330457e175a2c81751c607494e2cb97d1409bd83f5",
+    "kind": "recorded"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/v1/workflow/runs/00000000-0000-4000-8000-000000000002",
+    "headers": {}
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": {
+        "billing": {
+          "method": "included",
+          "periodMonth": "2026-11",
+          "currency": "USD",
+          "amountUsd": "0.0000"
+        },
+        "id": "00000000-0000-4000-8000-000000000002",
+        "configVersionID": "00000000-0000-4000-8000-000000000001",
+        "revision": 1,
+        "status": "failed",
+        "mode": "production",
+        "source": "api_async",
+        "output": {
+          "data": {
+            "agent": {},
+            "api_connector": {},
+            "branch": {},
+            "final": {},
+            "guardrail": {},
+            "input": {
+              "payload": {},
+              "question": "SDK fixture answer"
+            },
+            "mcp_tool": {},
+            "router": {},
+            "transform": {
+              "prepare": {
+                "result": {
+                  "answer": "SDK fixture answer"
+                }
+              }
+            }
+          },
+          "error": "End 'end': response \"answer\" could not be evaluated: cannot fetch value from <nil> (1:23)\n | input.payload.missing.value\n | ......................^",
+          "steps": [
+            {
+              "index": 0,
+              "nodeId": "Start",
+              "name": "Start",
+              "type": "start",
+              "attempt": 1,
+              "status": "completed",
+              "startedAt": "2026-11-13T13:21:39.840752793Z",
+              "durationMs": 0,
+              "input": {
+                "input": {
+                  "payload": {},
+                  "question": "SDK fixture answer"
+                }
+              },
+              "output": {
+                "payload": {},
+                "question": "SDK fixture answer"
+              }
+            },
+            {
+              "index": 1,
+              "nodeId": "00000000-0000-4000-8000-000000000003",
+              "name": "prepare",
+              "type": "transform",
+              "attempt": 1,
+              "status": "completed",
+              "startedAt": "2026-11-13T13:21:39.840826918Z",
+              "durationMs": 0,
+              "input": {
+                "answer": "SDK fixture answer"
+              },
+              "output": {
+                "answer": "SDK fixture answer"
+              },
+              "previousNodeIds": [
+                "Start"
+              ]
+            },
+            {
+              "index": 2,
+              "nodeId": "00000000-0000-4000-8000-000000000004",
+              "name": "end",
+              "type": "end",
+              "attempt": 1,
+              "status": "failed",
+              "startedAt": "2026-11-13T13:21:39.840904001Z",
+              "durationMs": 0,
+              "error": "End 'end': response \"answer\" could not be evaluated: cannot fetch value from <nil> (1:23)\n | input.payload.missing.value\n | ......................^",
+              "previousNodeIds": [
+                "00000000-0000-4000-8000-000000000003"
+              ]
+            }
+          ]
+        },
+        "error": "End 'end': response \"answer\" could not be evaluated: cannot fetch value from <nil> (1:23)\n | input.payload.missing.value\n | ......................^",
+        "failureOrigin": "workflow",
+        "createdAt": "2026-11-13T13:21:39.836156Z",
+        "startedAt": "2026-11-13T13:21:39.838306Z",
+        "finishedAt": "2026-11-13T13:21:39.84111Z"
+      },
+      "error": "",
+      "status": 200,
+      "errorCode": ""
+    }
+  },
+  "expect": {
+    "kind": "resource",
+    "resource": {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "status": "failed"
+    },
+    "outcome": {
+      "status": "failed",
+      "output": {
+        "agent": {},
+        "api_connector": {},
+        "branch": {},
+        "final": {},
+        "guardrail": {},
+        "input": {
+          "payload": {},
+          "question": "SDK fixture answer"
+        },
+        "mcp_tool": {},
+        "router": {},
+        "transform": {
+          "prepare": {
+            "result": {
+              "answer": "SDK fixture answer"
+            }
+          }
+        }
+      },
+      "stepCount": 3,
+      "error": "End 'end': response \"answer\" could not be evaluated: cannot fetch value from <nil> (1:23)\n | input.payload.missing.value\n | ......................^"
+    }
+  }
+}

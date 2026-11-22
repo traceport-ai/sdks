@@ -1,0 +1,76 @@
+{
+  "name": "workflows.runs.list.page",
+  "description": "Newest-first summaries. Lists never include output.",
+  "operation": "listWorkflowRuns",
+  "source": {
+    "from": "Local Traceport Docker API at http://127.0.0.1:1010; synthetic provider-free Start/Transform/End workflows. Runtime OpenAPI matches traceport-apis@aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8.",
+    "recordedAt": "2026-11-13T13:21:39.847264Z",
+    "capture": "live-http",
+    "serverSpecSha256": "79cc9342ee72408734a729330457e175a2c81751c607494e2cb97d1409bd83f5",
+    "kind": "recorded"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/v1/workflow/runs?configVersionID=00000000-0000-4000-8000-000000000001&limit=2&offset=0",
+    "headers": {}
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": {
+        "items": [
+          {
+            "billing": {
+              "method": "included",
+              "periodMonth": "2026-11",
+              "currency": "USD",
+              "amountUsd": "0.0000"
+            },
+            "id": "00000000-0000-4000-8000-000000000003",
+            "configVersionID": "00000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "status": "succeeded",
+            "mode": "production",
+            "source": "api_async",
+            "createdAt": "2026-11-13T13:21:39.820011Z",
+            "startedAt": "2026-11-13T13:21:39.823543Z",
+            "finishedAt": "2026-11-13T13:21:39.825373Z"
+          },
+          {
+            "billing": {
+              "method": "included",
+              "periodMonth": "2026-11",
+              "currency": "USD",
+              "amountUsd": "0.0000"
+            },
+            "id": "00000000-0000-4000-8000-000000000004",
+            "configVersionID": "00000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "status": "succeeded",
+            "mode": "production",
+            "source": "api_sync",
+            "createdAt": "2026-11-13T13:21:39.804545Z",
+            "startedAt": "2026-11-13T13:21:39.805218Z",
+            "finishedAt": "2026-11-13T13:21:39.807027Z"
+          }
+        ],
+        "limit": 2,
+        "offset": 0
+      },
+      "error": "",
+      "status": 200,
+      "errorCode": ""
+    }
+  },
+  "expect": {
+    "kind": "resource",
+    "resource": {
+      "itemCount": 2,
+      "limit": 2,
+      "offset": 0
+    }
+  }
+}

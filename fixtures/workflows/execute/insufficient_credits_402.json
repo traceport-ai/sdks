@@ -1,0 +1,47 @@
+{
+  "name": "workflows.execute.insufficient_credits_402",
+  "description": "Wallet funding is ineligible before the run starts.",
+  "operation": "executeWorkflow",
+  "source": {
+    "from": "Local Traceport Docker API at http://127.0.0.1:1010; synthetic provider-free Start/Transform/End workflows. Runtime OpenAPI matches traceport-apis@aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8.",
+    "recordedAt": "2026-11-13T13:21:39.790764Z",
+    "capture": "live-http",
+    "serverSpecSha256": "79cc9342ee72408734a729330457e175a2c81751c607494e2cb97d1409bd83f5",
+    "kind": "recorded"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/workflow/execute",
+    "headers": {
+      "Idempotency-Key": "fixture-exec-1"
+    },
+    "body": {
+      "configVersionID": "00000000-0000-4000-8000-000000000001",
+      "additional": {
+        "question": "SDK fixture answer",
+        "payload": {}
+      }
+    }
+  },
+  "response": {
+    "status": 402,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": null,
+      "error": "insufficient wallet credits for workflow execution",
+      "status": 402,
+      "errorCode": "insufficient_credits"
+    }
+  },
+  "expect": {
+    "kind": "error",
+    "error": {
+      "class": "PaymentRequiredError",
+      "status": 402,
+      "errorCode": "insufficient_credits",
+      "retryable": false
+    }
+  }
+}

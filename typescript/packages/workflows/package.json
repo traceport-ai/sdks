@@ -1,0 +1,59 @@
+{
+  "name": "@traceport/workflows",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Traceport workflows: execute saved workflows and manage durable runs.",
+  "license": "Apache-2.0",
+  "author": "Shineport Innovations Private Limited",
+  "homepage": "https://github.com/traceport-ai/sdks/tree/main/typescript/packages/workflows#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/traceport-ai/sdks.git",
+    "directory": "typescript/packages/workflows"
+  },
+  "bugs": "https://github.com/traceport-ai/sdks/issues",
+  "keywords": [
+    "traceport",
+    "sdk",
+    "workflows",
+    "ai"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "check:package": "publint && attw --pack .",
+    "prepack": "cp ../../../LICENSE LICENSE && npm run build"
+  },
+  "peerDependencies": {
+    "@traceport/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@traceport/core": "0.1.0"
+  }
+}

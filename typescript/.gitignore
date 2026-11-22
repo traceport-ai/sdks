@@ -1,0 +1,5 @@
+node_modules/
+dist/
+coverage/
+# Copied from the repository root by `npm pack` (prepack).
+LICENSE

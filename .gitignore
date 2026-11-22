@@ -1,0 +1,34 @@
+# OS / editors
+.DS_Store
+.idea/
+*.swp
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# TypeScript / Node
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.npmrc
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Go
+*.test
+*.out
+go.work
+go.work.sum

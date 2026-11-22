@@ -1,0 +1,857 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Traceport API",
+    "version": "1.0.0",
+    "description": "Public Traceport API operations wrapped by the official SDKs. Exported from traceport-apis by scripts/export_contract.py; do not edit by hand."
+  },
+  "servers": [
+    {
+      "url": "https://api.traceport.ai"
+    }
+  ],
+  "paths": {
+    "/v1/workflow/execute": {
+      "post": {
+        "tags": [
+          "APIs.Workflow"
+        ],
+        "summary": "Execute a workflow synchronously",
+        "security": [
+          {
+            "TraceportBearer": []
+          },
+          {
+            "TraceportKeyHeader": []
+          }
+        ],
+        "operationId": "executeWorkflow",
+        "description": "Execute an active, published workflow version and wait for its result. HTTP 200 describes a completed request, including workflows that failed: data.error contains the workflow failure message, data.data retains partial node output and data.steps retains executed steps. An empty data.error indicates success. SDK output helpers select non-empty data.data.final and otherwise retain the complete data.data map. Idempotency-Key is optional for compatibility; SDKs supply it and preserve the key and body across retries. A terminal replay returns the stored result without another execution; an in-progress replay returns HTTP 409 with the original run ID in the error message. Without a key, each request starts a separate execution. If the caller times out, do not assume the workflow stopped; recover with the same key. Usage is accounted once when processing begins. Error status codes follow the responses below: missing versions and unclassified execution-request errors currently return HTTP 409, not HTTP 404 or a dedicated HTTP 5xx response.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional, at most 200 bytes without whitespace or control characters. Scoped to organization, API key and this synchronous operation; do not reuse a key for a different body or run mode. Preserve it across network retries."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowExecuteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid request JSON/UUID or typed workflow/input validation failure. Typed validation uses validation_error; legacy request-decoding errors can return a masked message with traceport-0000.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, inactive or expired API key. Authentication failures may have errorCode traceport-0000 and a masked error message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Insufficient wallet funding; errorCode is insufficient_credits. Rejection before processing consumes no workflow execution. A background run can instead retain a later funding failure in its terminal resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Workflow allowance exhausted (workflow_quota_exceeded) or plan access denied (plan_upgrade_required). A background run can instead retain a later rejection in its terminal resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency conflict, a run still in progress, missing/inactive version, revision conflict, or another execution-request error. An in-progress response includes the existing run ID in the error message. errorCode can be empty; no structured existingRunId field is returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Completed workflow result or stored terminal replay. Inspect data.error: a non-empty value means workflow failure despite HTTP 200; partial data and executed steps are preserved. The outer error and errorCode are empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowExecuteEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflow/runs": {
+      "post": {
+        "tags": [
+          "APIs.Workflow"
+        ],
+        "summary": "Start a durable workflow run",
+        "security": [
+          {
+            "TraceportBearer": []
+          },
+          {
+            "TraceportKeyHeader": []
+          }
+        ],
+        "operationId": "startWorkflowRun",
+        "description": "Start an active, published workflow version in the background and return its durable run ID. Idempotency-Key is required: the same key and body return the original run with HTTP 200, while a changed body returns HTTP 409. An accepted run continues after the caller disconnects. Read its status with getWorkflowRun; it can succeed, fail or be interrupted. Execution usage is accounted once when processing begins, not when the request is accepted. Polling and idempotent replays do not consume another workflow execution. Interrupted runs are not automatically restarted.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "minLength": 1
+            },
+            "description": "Required, at most 200 bytes without whitespace or control characters. Scoped to organization, API key and this endpoint. Same body returns the original receipt (200); a changed body returns 409. SDK retries must preserve the key."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowExecuteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid JSON, unknown request fields, invalid workflow input, inactive version (workflow_version_inactive) or an invalid/missing Idempotency-Key. Other typed validation errors use validation_error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, inactive or expired API key. Authentication failures may have errorCode traceport-0000 and a masked error message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "New run accepted. The returned status is queued; later reads may already show running or a terminal status. Location identifies the run resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "Organization-scoped run resource.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Idempotent replay of the original run, including its current status and terminal output when available. No new execution is created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "Organization-scoped run resource.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Insufficient wallet funding; errorCode is insufficient_credits. Rejection before processing consumes no workflow execution. A background run can instead retain a later funding failure in its terminal resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Workflow allowance exhausted (workflow_quota_exceeded) or plan access denied (plan_upgrade_required). A background run can instead retain a later rejection in its terminal resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The idempotency key was reused with a different request (idempotency_conflict), or the saved version changed during validation (revision_conflict).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Version absent or owned by another organization; errorCode is workflow_version_not_found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The service is temporarily unable to accept a new run. errorCode is workflow_executor_unavailable; retry with the same key after Retry-After. No new run is accepted or billed.",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Retry delay in seconds."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "APIs.Workflow"
+        ],
+        "summary": "List workflow runs",
+        "security": [
+          {
+            "TraceportBearer": []
+          },
+          {
+            "TraceportKeyHeader": []
+          }
+        ],
+        "operationId": "listWorkflowRuns",
+        "description": "List workflow runs in the API key organization, newest first. Includes accounted synchronous, draft-test and background runs; older execution history predating run resources is excluded. Items are summaries and omit stored output. Use getWorkflowRun for a detailed result. The response contains items, limit and offset, with no total or cursor. Pages reflect current history; advance offset by the number of returned items. Reading history does not consume workflow execution usage.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "configVersionID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "queued",
+                "running",
+                "succeeded",
+                "failed",
+                "interrupted"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid version UUID, status, limit or offset; errorCode is validation_error. Limit must be 1–100 and offset 0–1000000.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, inactive or expired API key. Authentication failures may have errorCode traceport-0000 and a masked error message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Paginated summaries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunListEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflow/runs/{runId}": {
+      "get": {
+        "tags": [
+          "APIs.Workflow"
+        ],
+        "summary": "Get a workflow run",
+        "security": [
+          {
+            "TraceportBearer": []
+          },
+          {
+            "TraceportKeyHeader": []
+          }
+        ],
+        "operationId": "getWorkflowRun",
+        "description": "Read a durable run in the API key organization. Terminal runs include stored output and error details when available. A failed or interrupted run is a successful HTTP 200 resource read, not an HTTP error. Non-terminal reads omit output. Reading status does not consume workflow execution usage or cancel the run. Interrupted runs are not automatically restarted.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "runId is not a non-zero UUID; errorCode is validation_error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, inactive or expired API key. Authentication failures may have errorCode traceport-0000 and a masked error message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Run resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Run absent or owned by another organization; errorCode is workflow_run_not_found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "WorkflowExecuteEnvelope": {
+        "type": "object",
+        "required": [
+          "data",
+          "error",
+          "status",
+          "errorCode"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/WorkflowExecutionResult"
+          },
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "errorCode": {
+            "type": "string"
+          }
+        },
+        "description": "HTTP 200 response envelope. Workflow failure is represented by data.error, independently of the empty outer error field."
+      },
+      "WorkflowExecuteRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "configVersionID"
+        ],
+        "properties": {
+          "configVersionID": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "additional": {
+            "type": "object",
+            "additionalProperties": true,
+            "default": {},
+            "nullable": true
+          }
+        }
+      },
+      "WorkflowExecutionResult": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "data",
+          "error",
+          "steps"
+        ],
+        "description": "Completed workflow outcome. A non-empty error denotes workflow failure, including under HTTP 200. Partial results and ordered steps remain available.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Workflow values grouped by node type, including input and final. Values are application-defined JSON. Non-empty final is the interpreted output; otherwise the whole data map is used."
+          },
+          "error": {
+            "type": "string",
+            "description": "Empty on success; workflow failure message on failure."
+          },
+          "steps": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/WorkflowStep"
+            },
+            "description": "Executed node outcomes in order; may be null when no steps were recorded."
+          }
+        }
+      },
+      "WorkflowRun": {
+        "type": "object",
+        "required": [
+          "id",
+          "configVersionID",
+          "revision",
+          "status",
+          "mode",
+          "source",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configVersionID": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "interrupted"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "production",
+              "draft_test"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "description": "Execution entry point, such as api_sync or api_async. The separate mode field distinguishes production and draft-test runs."
+          },
+          "output": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Stored workflow result, present only on a detailed terminal run read or replay. List summaries and non-terminal runs omit this field. Unknown stored result fields are preserved."
+          },
+          "error": {
+            "type": "string",
+            "description": "Failure or interruption message when present. A run with a failed/interrupted status is still returned with HTTP 200 by getWorkflowRun."
+          },
+          "failureOrigin": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "billing": {
+            "$ref": "#/components/schemas/WorkflowRunBilling"
+          }
+        }
+      },
+      "WorkflowRunBilling": {
+        "type": "object",
+        "description": "Billing receipt for the original workflow execution, present once included usage or an overage charge is recorded. Replays and polling retain the same receipt. A credited platform failure retains the original receipt and sets creditedAt.",
+        "required": [
+          "method",
+          "periodMonth",
+          "currency",
+          "amountUsd"
+        ],
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "included",
+              "wallet",
+              "invoice"
+            ]
+          },
+          "periodMonth": {
+            "type": "string",
+            "example": "2026-11",
+            "description": "UTC calendar month when the original execution began."
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ]
+          },
+          "amountUsd": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d{4}$",
+            "example": "0.0090"
+          },
+          "creditedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WorkflowRunEnvelope": {
+        "type": "object",
+        "required": [
+          "data",
+          "error",
+          "status",
+          "errorCode"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/WorkflowRun"
+          },
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "errorCode": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkflowRunError": {
+        "type": "object",
+        "required": [
+          "data",
+          "status",
+          "error",
+          "errorCode"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "Machine-readable code when available; may be empty. Authentication can return traceport-0000."
+          }
+        },
+        "description": "Request failure envelope. data is normally null and errorCode can be empty. Do not infer a different HTTP status from the message. A request ID is available only when the server sends x-request-id."
+      },
+      "WorkflowRunListEnvelope": {
+        "type": "object",
+        "required": [
+          "data",
+          "error",
+          "status",
+          "errorCode"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items",
+              "limit",
+              "offset"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WorkflowRun"
+                }
+              },
+              "limit": {
+                "type": "integer"
+              },
+              "offset": {
+                "type": "integer"
+              }
+            }
+          },
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "errorCode": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkflowStep": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "index",
+          "nodeId",
+          "name",
+          "type",
+          "attempt",
+          "status",
+          "startedAt",
+          "durationMs"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "Zero-based execution order."
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "failed",
+              "continued_after_error",
+              "limit_reached"
+            ]
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "number"
+          },
+          "input": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "output": {
+            "description": "Application-defined JSON output, when present."
+          },
+          "error": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "dependencies": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "toolCalls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "modelAttempts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "previousNodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "splitId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "TraceportBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Existing Traceport API key."
+      },
+      "TraceportKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    }
+  }
+}

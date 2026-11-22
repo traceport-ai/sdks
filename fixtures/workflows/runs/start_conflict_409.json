@@ -1,0 +1,47 @@
+{
+  "name": "workflows.runs.start.conflict_409",
+  "description": "Same key with a different body.",
+  "operation": "startWorkflowRun",
+  "source": {
+    "from": "Local Traceport Docker API at http://127.0.0.1:1010; synthetic provider-free Start/Transform/End workflows. Runtime OpenAPI matches traceport-apis@aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8.",
+    "recordedAt": "2026-11-13T13:21:39.833431Z",
+    "capture": "live-http",
+    "serverSpecSha256": "79cc9342ee72408734a729330457e175a2c81751c607494e2cb97d1409bd83f5",
+    "kind": "recorded"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/workflow/runs",
+    "headers": {
+      "Idempotency-Key": "fixture-start-1"
+    },
+    "body": {
+      "configVersionID": "00000000-0000-4000-8000-000000000001",
+      "additional": {
+        "question": "changed fixture input",
+        "payload": {}
+      }
+    }
+  },
+  "response": {
+    "status": 409,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": null,
+      "error": "idempotency key was already used with a different workflow request",
+      "status": 409,
+      "errorCode": "idempotency_conflict"
+    }
+  },
+  "expect": {
+    "kind": "error",
+    "error": {
+      "class": "ConflictError",
+      "status": 409,
+      "errorCode": "idempotency_conflict",
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "description": "operationIds from the traceport-apis OpenAPI document that make up the public SDK contract. Only these operations, and the components they reference, are exported to contract/openapi.json.",
+  "operations": [
+    "executeWorkflow",
+    "getWorkflowRun",
+    "listWorkflowRuns",
+    "startWorkflowRun"
+  ]
+}

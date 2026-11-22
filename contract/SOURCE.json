@@ -1,0 +1,8 @@
+{
+  "repository": "traceport-ai/traceport-apis",
+  "path": "internal/openapi/openapi.json",
+  "ref": "feat/wf-exe-accnt",
+  "commit": "aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8",
+  "uncommittedChanges": true,
+  "sha256": "2415c994f812cea6273d18ddbb04d91efcb5227c75cafff5acd68774926516a6"
+}

@@ -1,0 +1,7 @@
+# Every path needs a review from an SDK maintainer.
+# Replace the placeholder with a real team or user before enabling
+# "Require review from Code Owners" in branch protection.
+#
+# *                 @traceport-ai/sdk-maintainers
+# /contract/        @traceport-ai/api-maintainers
+# /.github/         @traceport-ai/sdk-maintainers

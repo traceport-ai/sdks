@@ -1,0 +1,54 @@
+{
+  "name": "workflows.runs.start.accepted_202",
+  "description": "New run accepted and queued.",
+  "operation": "startWorkflowRun",
+  "source": {
+    "from": "Local Traceport Docker API at http://127.0.0.1:1010; synthetic provider-free Start/Transform/End workflows. Runtime OpenAPI matches traceport-apis@aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8.",
+    "recordedAt": "2026-11-13T13:21:39.817956Z",
+    "capture": "live-http",
+    "serverSpecSha256": "79cc9342ee72408734a729330457e175a2c81751c607494e2cb97d1409bd83f5",
+    "kind": "recorded"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/workflow/runs",
+    "headers": {
+      "Idempotency-Key": "fixture-start-1"
+    },
+    "body": {
+      "configVersionID": "00000000-0000-4000-8000-000000000001",
+      "additional": {
+        "question": "SDK fixture answer",
+        "payload": {}
+      }
+    }
+  },
+  "response": {
+    "status": 202,
+    "headers": {
+      "Content-Type": "application/json",
+      "Location": "/v1/workflow/runs/00000000-0000-4000-8000-000000000002"
+    },
+    "body": {
+      "data": {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "configVersionID": "00000000-0000-4000-8000-000000000001",
+        "revision": 1,
+        "status": "queued",
+        "mode": "production",
+        "source": "api_async",
+        "createdAt": "2026-11-13T13:21:39.820011Z"
+      },
+      "error": "",
+      "status": 202,
+      "errorCode": ""
+    }
+  },
+  "expect": {
+    "kind": "resource",
+    "resource": {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "status": "queued"
+    }
+  }
+}

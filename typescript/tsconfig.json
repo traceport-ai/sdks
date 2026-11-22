@@ -1,0 +1,19 @@
+{
+  // Type-checks every package, test and config against package sources (no build needed).
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@traceport/core": ["./packages/core/src/index.ts"],
+      "@traceport/core/internal": ["./packages/core/src/internal.ts"],
+      "@traceport/workflows": ["./packages/workflows/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/*/src",
+    "packages/*/test",
+    "packages/*/*.config.ts",
+    "test-utils",
+    "*.config.ts"
+  ]
+}

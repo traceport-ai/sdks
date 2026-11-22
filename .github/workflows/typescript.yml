@@ -1,0 +1,72 @@
+name: typescript
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "typescript/**"
+      - "contract/**"
+      - "fixtures/**"
+      - ".github/workflows/typescript.yml"
+  pull_request:
+    paths:
+      - "typescript/**"
+      - "contract/**"
+      - "fixtures/**"
+      - ".github/workflows/typescript.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: typescript-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: typescript
+
+jobs:
+  check:
+    name: lint, types and package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run examples
+      - run: npm run build
+      # Loads the built packages in ESM and CommonJS; unit tests run against sources.
+      - run: npm run smoke
+      - run: npm run check:package
+
+  test:
+    name: test (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npm run smoke

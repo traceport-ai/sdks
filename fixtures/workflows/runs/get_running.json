@@ -1,0 +1,51 @@
+{
+  "name": "workflows.runs.get.running",
+  "description": "Unfinished run: no output yet.",
+  "operation": "getWorkflowRun",
+  "source": {
+    "from": "Local Traceport Docker API at http://127.0.0.1:1010; synthetic provider-free Start/Transform/End workflows. Runtime OpenAPI matches traceport-apis@aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8.",
+    "recordedAt": "2026-11-13T13:21:39.868312Z",
+    "capture": "live-http",
+    "serverSpecSha256": "79cc9342ee72408734a729330457e175a2c81751c607494e2cb97d1409bd83f5",
+    "kind": "recorded"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/v1/workflow/runs/00000000-0000-4000-8000-000000000002",
+    "headers": {}
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": {
+        "billing": {
+          "method": "included",
+          "periodMonth": "2026-11",
+          "currency": "USD",
+          "amountUsd": "0.0000"
+        },
+        "id": "00000000-0000-4000-8000-000000000002",
+        "configVersionID": "00000000-0000-4000-8000-000000000001",
+        "revision": 1,
+        "status": "running",
+        "mode": "production",
+        "source": "api_async",
+        "createdAt": "2026-11-13T13:21:39.857158Z",
+        "startedAt": "2026-11-13T13:21:39.862503Z"
+      },
+      "error": "",
+      "status": 200,
+      "errorCode": ""
+    }
+  },
+  "expect": {
+    "kind": "resource",
+    "resource": {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "status": "running"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "workflows.runs.list.invalid_limit_400",
+  "description": "Rejected query parameter.",
+  "operation": "listWorkflowRuns",
+  "source": {
+    "from": "Local Traceport Docker API at http://127.0.0.1:1010; synthetic provider-free Start/Transform/End workflows. Runtime OpenAPI matches traceport-apis@aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8.",
+    "recordedAt": "2026-11-13T13:21:39.846410Z",
+    "capture": "live-http",
+    "serverSpecSha256": "79cc9342ee72408734a729330457e175a2c81751c607494e2cb97d1409bd83f5",
+    "kind": "recorded"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/v1/workflow/runs?limit=0",
+    "headers": {}
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": null,
+      "error": "invalid limit",
+      "status": 400,
+      "errorCode": "validation_error"
+    }
+  },
+  "expect": {
+    "kind": "error",
+    "error": {
+      "class": "BadRequestError",
+      "status": 400,
+      "errorCode": "validation_error",
+      "retryable": false
+    }
+  }
+}
