@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	// Version is the SDK's pre-release version.
+	// Version is the SDK release version, sent in the User-Agent header.
 	Version = "0.0.1"
 	// DefaultBaseURL includes the public API version prefix.
 	DefaultBaseURL = "https://api.traceport.ai/v1"
