@@ -2,7 +2,7 @@
 
 Run saved [Traceport](https://traceport.ai) workflows synchronously, or as durable background runs. Uses the shared client from [`@traceport/core`](https://github.com/traceport-ai/sdks/tree/main/typescript/packages/core).
 
-> **Status: 0.1.0 pre-release, unpublished.** Human input, events and run cancellation are not part of this version.
+> **Status: 0.0.1 pre-release, unpublished.** Human input, events and run cancellation are not part of this version.
 
 ```sh
 npm install @traceport/core @traceport/workflows   # after publication
@@ -19,7 +19,7 @@ import { Workflows } from "@traceport/workflows";
 const workflows = new Workflows(new Traceport()); // reads TRACEPORT_API_KEY
 
 const result = await workflows.execute({
-  versionId: "<workflow-version-id>",
+  deployment: "support-triage-prod",
   input: { question: "What is Traceport?" },
 });
 
@@ -74,11 +74,20 @@ A client-side `execute` timeout is **not** retried, because the workflow may sti
 
 ## Durable runs
 
+### Deployment codes or version IDs
+
+Pass exactly one of:
+
+- `deployment` (recommended): a stable code such as `"support-triage-prod"`, created on the workflow's Deployments tab in the dashboard. The server runs whichever version is deployed to the code, so shipping a new version needs no change in your application. An unknown code throws `NotFoundError` (`deployment_not_found`); a code with nothing deployed throws `ConflictError` (`deployment_empty`).
+- `versionId`: pins one exact version. It must be live (deployed to at least one code).
+
+Passing both or neither throws `TypeError` before any request is sent. Runs started by code carry the code in `run.deployment`.
+
 Durable runs execute in the background. Start one, store its ID, and read it later.
 
 ```ts
 const run = await workflows.runs.start(
-  { versionId, input: { question: "Hi" } },
+  { deployment: "support-triage-prod", input: { question: "Hi" } },
   { idempotencyKey: jobId }, // optional; persist it to retry safely across restarts
 );
 
@@ -86,7 +95,11 @@ const finished = await workflows.runs.waitForCompletion(run.id, { timeout: 120_0
 console.log(finished.status, finished.result?.output);
 
 const latest = await workflows.runs.get(run.id);
-const page = await workflows.runs.list({ versionId, status: "failed", limit: 20 });
+const page = await workflows.runs.list({
+  deployment: "support-triage-prod",
+  status: "failed",
+  limit: 20,
+});
 ```
 
 Choose a new job ID for each logical start and persist it with the job; reuse it when recovering the same start after a restart. The same key with different input fails with `ConflictError`.
@@ -96,7 +109,7 @@ Choose a new job ID for each logical start and persist it with the job; reuse it
 - `runs.list` returns summaries newest first; summaries have no `output` or `result`.
 - Each run's `result` interprets its stored output the same way as `execute`.
 
-Parameters use `versionId` and `input`; the SDK sends them as the API's `configVersionID` and `additional`. Run resources keep the API's field names.
+Parameters use `deployment` or `versionId`, and `input`; the SDK sends them as the API's `deployment` or `configVersionID`, and `additional`. Run resources keep the API's field names.
 
 ### Polling and pagination
 
@@ -109,7 +122,7 @@ Parameters use `versionId` and `input`; the SDK sends them as the API's `configV
 
 `signal`, `headers` and `maxRetries` are forwarded to polling reads. Aborting stops polling and leaves the run alive.
 
-List filters are `versionId`, `status`, `limit` and `offset`. The server defaults to `limit=50`, `offset=0`; supported ranges are 1–100 and 0–1,000,000. Pages contain `items`, `limit` and `offset`, with no total or cursor. Advance `offset` by the number of returned items; an empty or short page ends the scan.
+List filters are `versionId`, `deployment`, `status`, `limit` and `offset`. The server defaults to `limit=50`, `offset=0`; supported ranges are 1–100 and 0–1,000,000. Pages contain `items`, `limit` and `offset`, with no total or cursor. Advance `offset` by the number of returned items; an empty or short page ends the scan.
 
 ### Resource types
 

@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27,<2"]
 build-backend = "hatchling.build"
 
 [project]
-name = "traceport"
+name = "traceport-ai"
 dynamic = ["version"]
 description = "Official Python SDK for the Traceport API: one shared client and per-product modules."
 readme = "README.md"
@@ -37,10 +37,10 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "src/traceport/_version.py"
+path = "src/traceport_ai/_version.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/traceport"]
+packages = ["src/traceport_ai"]
 
 [tool.hatch.build.targets.sdist]
 include = ["/src", "/examples", "/pyproject.toml", "/README.md", "/CHANGELOG.md", "/LICENSE"]
@@ -64,5 +64,5 @@ strict = true
 files = ["src", "examples"]
 
 [tool.coverage.run]
-source = ["traceport"]
+source = ["traceport_ai"]
 branch = true

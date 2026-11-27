@@ -1,0 +1,53 @@
+{
+  "name": "workflows.runs.start.by_deployment_202",
+  "description": "Start a durable run by deployment code; the run records the resolved version and the code.",
+  "operation": "startWorkflowRun",
+  "source": {
+    "kind": "derived",
+    "from": "traceport-apis@bf9256751d71 feat/workflow_deployment (uncommitted MGMT-08 changes): internal/transport/http/handlers/server/handler.go, internal/transport/http/handlers/server/workflow_runs.go, internal/transport/http/handlers/shared/errors.go, internal/usecase/executions/usecase.go, internal/transport/http/dto/workflow_run.go. Replace with a recording once a server runs this build."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/workflow/runs",
+    "headers": {
+      "Idempotency-Key": "fixture-start-1"
+    },
+    "body": {
+      "deployment": "support-triage-prod",
+      "additional": {
+        "question": "SDK fixture answer",
+        "payload": {}
+      }
+    }
+  },
+  "response": {
+    "status": 202,
+    "headers": {
+      "Content-Type": "application/json",
+      "Location": "/v1/workflow/runs/00000000-0000-4000-8000-000000000002"
+    },
+    "body": {
+      "data": {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "configVersionID": "00000000-0000-4000-8000-000000000001",
+        "deployment": "support-triage-prod",
+        "revision": 1,
+        "status": "queued",
+        "mode": "production",
+        "source": "api_async",
+        "createdAt": "2026-11-13T13:21:39.820011Z"
+      },
+      "error": "",
+      "status": 202,
+      "errorCode": ""
+    }
+  },
+  "expect": {
+    "kind": "resource",
+    "resource": {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "status": "queued",
+      "deployment": "support-triage-prod"
+    }
+  }
+}

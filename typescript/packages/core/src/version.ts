@@ -3,4 +3,4 @@
  *
  * Keep it equal to `version` in package.json; a unit test enforces this.
  */
-export const VERSION = "0.1.0";
+export const VERSION = "0.0.1";

@@ -1,9 +1,9 @@
 # Changelog
 
-## 0.1.0 (Unreleased)
+## 0.0.1 (Unreleased)
 
-Initial release of `traceport`: the shared clients in `traceport` and the workflows product in
-`traceport.workflows`. This version has not been published.
+Initial release of `traceport-ai` (import `traceport_ai`): the shared clients in `traceport_ai` and the workflows product in
+`traceport_ai.workflows`. This version has not been published.
 
 ### Clients and configuration
 
@@ -16,11 +16,12 @@ Initial release of `traceport`: the shared clients in `traceport` and the workfl
 ### Workflows and results
 
 - `Workflows(client)` and `AsyncWorkflows(async_client)` product classes; `execute` for synchronous workflow execution.
+- `deployment=` runs whichever version is deployed to a stable code; `version_id=` pins one version. Exactly one is required (`TypeError` before sending otherwise). `WorkflowRun.deployment` and the `deployment=` list filter expose and filter by the code.
 - `runs.start`, `get` and `list` for durable runs, including version/status filters and offset pagination.
 - `runs.wait_for_completion` with configurable observation timeout, request timeout and polling intervals.
 - Typed Pydantic run, step, page and billing-receipt models with snake_case properties, API wire aliases, parsed timestamps, decimal-string billing amounts and preserved extra fields.
 - Workflow failures returned as normal results, retaining partial output, raw data and executed steps.
-- Interpreted stored results, final-output selection with a full-data fallback, and `traceport.workflows.require_output` and model `require_output` helpers with optional schema decoding.
+- Interpreted stored results, final-output selection with a full-data fallback, and `traceport_ai.workflows.require_output` and model `require_output` helpers with optional schema decoding.
 
 ### Reliability and errors
 

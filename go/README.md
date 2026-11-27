@@ -2,7 +2,7 @@
 
 Standard-library-only Go SDK for the Traceport API. Requires Go 1.22+.
 
-**0.1.0 pre-release, unpublished.** Local unit/fixture verification is complete; live-server
+**0.0.1 pre-release, unpublished.** Local unit/fixture verification is complete; live-server
 conformance and a versioned module release remain pending. The module path is
 `github.com/traceport-ai/sdks/go`.
 
@@ -31,8 +31,8 @@ require github.com/traceport-ai/sdks/go v0.0.0
 replace github.com/traceport-ai/sdks/go => /absolute/path/to/sdks/go
 ```
 
-After publication, install with `go get github.com/traceport-ai/sdks/go@v0.1.0`.
-Subdirectory release tags must have the `go/` prefix, for example `go/v0.1.0`.
+After publication, install with `go get github.com/traceport-ai/sdks/go@v0.0.1`.
+Subdirectory release tags must have the `go/` prefix, for example `go/v0.0.1`.
 
 ## Execute a workflow
 
@@ -56,8 +56,8 @@ func main() {
 	wf := workflows.New(client) // other products take the same client
 
 	result, err := wf.Execute(context.Background(), workflows.StartParams{
-		VersionID: "<published-workflow-version-id>",
-		Input:     map[string]any{"question": "What is Traceport?"},
+		Deployment: "support-triage-prod", // or VersionID: "<workflow-version-id>"
+		Input:      map[string]any{"question": "What is Traceport?"},
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -147,13 +147,27 @@ or HTTP client return `*ValidationError`. The original client is unchanged.
 
 ## Durable runs
 
+### Deployment codes or version IDs
+
+Set exactly one of:
+
+- `Deployment` (recommended): a stable code such as `"support-triage-prod"`, created on the
+  workflow's Deployments tab in the dashboard. The server runs whichever version is deployed
+  to it, so shipping a new version needs no change in your code. An unknown code returns a
+  not-found error (`deployment_not_found`); a code with nothing deployed returns a conflict
+  error (`deployment_empty`).
+- `VersionID`: pins one exact version. It must be live (deployed to at least one code).
+
+Setting both or neither returns `*traceport.ValidationError` before any request is sent.
+Runs started by code carry it in `Run.Deployment`.
+
 Inside a function returning `error`, using `wf := workflows.New(client)` and application
-values `ctx`, `versionID` and a persisted `jobID`:
+values `ctx`, `deployment` and a persisted `jobID`:
 
 ```go
 run, err := wf.Runs.Start(ctx, workflows.StartParams{
-	VersionID: versionID,
-	Input:     map[string]any{"question": "Hello"},
+	Deployment: deployment,
+	Input:      map[string]any{"question": "Hello"},
 }, traceport.WithIdempotencyKey(jobID)) // persist one key per logical job
 if err != nil {
 	return err
@@ -178,10 +192,10 @@ if err != nil {
 	return err
 }
 page, err := wf.Runs.List(ctx, workflows.ListRunsParams{
-	VersionID: versionID,
-	Status:    workflows.RunFailed,
-	Limit:     workflows.Int(20),
-	Offset:    workflows.Int(0),
+	Deployment: deployment,
+	Status:     workflows.RunFailed,
+	Limit:      workflows.Int(20),
+	Offset:     workflows.Int(0),
 })
 if err != nil {
 	return err
@@ -189,7 +203,7 @@ if err != nil {
 fmt.Println(latest.Status, len(page.Items))
 ```
 
-- `VersionID`/`Input` parameters map to the API's `configVersionID`/`additional`.
+- `Deployment` or `VersionID`, and `Input`, map to the API's `deployment` or `configVersionID`, and `additional`.
   A nil Input sends `{}`. Other resource fields use Go casing with the original JSON tags.
 - Get and WaitForCompletion return failed and interrupted runs normally. Check `Status`
   or call `RequireOutput` to opt into a workflow failure error.
@@ -206,7 +220,7 @@ fmt.Println(latest.Status, len(page.Items))
   Unrecognized stored-output objects remain readable with a nil Result. Run `Raw` retains
   additive fields from the server.
 
-List filters are `VersionID`, `Status`, `Limit` and `Offset`. The server defaults to
+List filters are `VersionID`, `Deployment`, `Status`, `Limit` and `Offset`. The server defaults to
 limit 50 and offset 0; supported ranges are 1–100 and 0–1,000,000 respectively.
 Pages expose `Items`, `Limit` and `Offset`, with no total or next-cursor field.
 Advance Offset by the number of returned items; an empty or short page ends the scan.

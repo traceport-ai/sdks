@@ -8,7 +8,7 @@ import uuid
 import httpx
 import pytest
 
-from traceport import (
+from traceport_ai import (
     APIConnectionError,
     APIError,
     APITimeoutError,
@@ -18,7 +18,7 @@ from traceport import (
     Traceport,
     TraceportError,
 )
-from traceport.workflows import AsyncWorkflows, Workflows
+from traceport_ai.workflows import AsyncWorkflows, Workflows
 
 from .helpers import RUN_ID, VERSION_ID, failure, response, result, run
 

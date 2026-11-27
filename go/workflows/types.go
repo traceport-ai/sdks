@@ -92,6 +92,7 @@ type Result struct {
 type Run struct {
 	ID              string                     `json:"id"`
 	ConfigVersionID string                     `json:"configVersionID"`
+	Deployment      string                     `json:"deployment,omitempty"` // code the run was started through; "" when started by version ID
 	Revision        int64                      `json:"revision"`
 	Status          RunStatus                  `json:"status"`
 	Mode            RunMode                    `json:"mode"`
@@ -114,8 +115,14 @@ type RunPage struct {
 	Offset int   `json:"offset"`
 }
 
-// StartParams is shared by Execute and Runs.Start. A nil Input sends {}.
+// StartParams is shared by Execute and Runs.Start. Set exactly one of
+// Deployment (recommended) or VersionID. A nil Input sends {}.
 type StartParams struct {
+	// Deployment is a stable code, for example "support-triage-prod". The
+	// server runs whichever version is deployed to it, so deploying a new
+	// version needs no change in your code.
+	Deployment string
+	// VersionID pins one exact version. It must be live.
 	VersionID string
 	Input     map[string]any
 }
@@ -124,9 +131,11 @@ type StartParams struct {
 // Use Int to distinguish an explicit zero from an omitted query parameter.
 type ListRunsParams struct {
 	VersionID string
-	Status    RunStatus
-	Limit     *int
-	Offset    *int
+	// Deployment lists only runs started through this code.
+	Deployment string
+	Status     RunStatus
+	Limit      *int
+	Offset     *int
 }
 
 // Int returns a pointer for an optional integer query parameter.

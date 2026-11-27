@@ -2,7 +2,7 @@
 
 The shared client for the [Traceport](https://traceport.ai) TypeScript SDK. It owns your API key, base URL, HTTP transport, retries, timeouts and error classes. Product packages such as [`@traceport/workflows`](https://github.com/traceport-ai/sdks/tree/main/typescript/packages/workflows) take this client, so one client serves every product.
 
-> **Status: 0.1.0 pre-release, unpublished.**
+> **Status: 0.0.1 pre-release, unpublished.**
 
 - Server-side Node.js 20+, with a Fetch-based implementation for compatible Bun, Deno and edge runtimes.
 - No runtime dependencies. ESM and CommonJS builds with type declarations.

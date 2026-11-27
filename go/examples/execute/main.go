@@ -1,4 +1,4 @@
-// Run with TRACEPORT_API_KEY and TRACEPORT_VERSION_ID set.
+// Run with TRACEPORT_API_KEY and TRACEPORT_DEPLOYMENT (a deployment code) set.
 package main
 
 import (
@@ -19,8 +19,8 @@ func main() {
 	// One client serves every Traceport product; each product package takes it.
 	wf := workflows.New(client)
 	result, err := wf.Execute(context.Background(), workflows.StartParams{
-		VersionID: os.Getenv("TRACEPORT_VERSION_ID"),
-		Input:     map[string]any{"question": "What is Traceport?"},
+		Deployment: os.Getenv("TRACEPORT_DEPLOYMENT"),
+		Input:      map[string]any{"question": "What is Traceport?"},
 	})
 	if err != nil {
 		log.Fatal(err)

@@ -5,8 +5,8 @@ import time
 
 import pytest
 
-from traceport import APITimeoutError, InvalidResponseError
-from traceport.workflows import (
+from traceport_ai import APITimeoutError, InvalidResponseError
+from traceport_ai.workflows import (
     WaitTimeoutError,
     WorkflowFailedError,
     WorkflowResult,
@@ -83,6 +83,20 @@ async def test_wait_options_are_validated_before_http(make, name, value):
     h = make([])
     with pytest.raises(TypeError):
         await h.call(h.workflows.runs.wait_for_completion, RUN_ID, **{name: value})
+    assert h.requests == []
+
+
+@pytest.mark.parametrize(
+    "target",
+    [{"version_id": VERSION_ID, "deployment": "support-triage-prod"}, {}, {"deployment": " "}],
+    ids=["both", "neither", "blank-deployment"],
+)
+@pytest.mark.parametrize("operation", ["execute", "start"])
+async def test_start_requires_exactly_one_target(make, operation, target):
+    h = make([])
+    method = h.workflows.execute if operation == "execute" else h.workflows.runs.start
+    with pytest.raises(TypeError):
+        await h.call(method, **target)
     assert h.requests == []
 
 
@@ -179,7 +193,7 @@ async def test_first_poll_interval_is_capped(make):
 
 
 async def test_cancel_while_polling(make):
-    from traceport import RequestAbortedError
+    from traceport_ai import RequestAbortedError
 
     cancel = threading.Event()
     h = make([response(run())])

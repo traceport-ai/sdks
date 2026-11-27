@@ -10,8 +10,8 @@ import uuid
 from collections.abc import Callable
 from typing import Any
 
-from traceport import AsyncTraceport, AuthenticationError, ConflictError, Traceport
-from traceport.workflows import AsyncWorkflows, WaitTimeoutError, Workflows, require_output
+from traceport_ai import AsyncTraceport, AuthenticationError, ConflictError, Traceport
+from traceport_ai.workflows import AsyncWorkflows, WaitTimeoutError, Workflows, require_output
 
 
 def product(client: Traceport | AsyncTraceport) -> Workflows | AsyncWorkflows:

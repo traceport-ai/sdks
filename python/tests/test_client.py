@@ -5,8 +5,8 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from traceport import AsyncTraceport, InternalServerError, Traceport
-from traceport.workflows import AsyncWorkflows, Workflows
+from traceport_ai import AsyncTraceport, InternalServerError, Traceport
+from traceport_ai.workflows import AsyncWorkflows, Workflows
 
 from .helpers import RUN_ID, failure, response, run
 
@@ -116,5 +116,5 @@ def test_products_reject_the_wrong_client_type():
         Workflows(AsyncTraceport(api_key="key"))  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="sync product class"):
         AsyncWorkflows(Traceport(api_key="key"))  # type: ignore[arg-type]
-    with pytest.raises(TypeError, match="expected a traceport.Traceport"):
+    with pytest.raises(TypeError, match="expected a traceport_ai.Traceport"):
         Workflows(object())  # type: ignore[arg-type]

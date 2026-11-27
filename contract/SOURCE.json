@@ -1,8 +1,8 @@
 {
   "repository": "traceport-ai/traceport-apis",
   "path": "internal/openapi/openapi.json",
-  "ref": "feat/wf-exe-accnt",
-  "commit": "aabe5e87ca5731dc72da1ebc51aee7b2e3d0c4f8",
+  "ref": "feat/workflow_deployment",
+  "commit": "bf9256751d715ec6b2763c9a400fb5098240f469",
   "uncommittedChanges": true,
-  "sha256": "2415c994f812cea6273d18ddbb04d91efcb5227c75cafff5acd68774926516a6"
+  "sha256": "b315a3ce48edd36f159819dddcf1886a6d21dcb0558a1c3e68a1697fddca72b6"
 }

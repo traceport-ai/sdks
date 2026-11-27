@@ -11,6 +11,7 @@ import {
   type WorkflowResult,
   type WorkflowRun,
   type WaitForCompletionOptions,
+  type WorkflowStartParams,
 } from "../src/index.js";
 import {
   envelope,
@@ -45,6 +46,20 @@ describe("argument validation", () => {
 
   it("requires a versionId", async () => {
     await expect(workflows.execute({ versionId: "" })).rejects.toBeInstanceOf(TypeError);
+  });
+
+  it("requires a non-empty deployment", async () => {
+    await expect(workflows.execute({ deployment: " " })).rejects.toBeInstanceOf(TypeError);
+  });
+
+  it.each([
+    ["both", { versionId: VERSION_ID, deployment: "support-triage-prod" }],
+    ["neither", {}],
+  ])("requires exactly one of deployment or versionId (%s)", async (_, params) => {
+    const start = workflows.runs.start(params as unknown as WorkflowStartParams);
+    await expect(start).rejects.toThrow("pass exactly one of deployment or versionId");
+    const execute = workflows.execute(params as unknown as WorkflowStartParams);
+    await expect(execute).rejects.toBeInstanceOf(TypeError);
   });
 
   it("requires input to be an object", async () => {

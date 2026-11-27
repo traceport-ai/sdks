@@ -28,7 +28,8 @@ class Runs:
     def start(
         self,
         *,
-        version_id: str,
+        deployment: str | None = None,
+        version_id: str | None = None,
         input: Mapping[str, Any] | None = None,
         idempotency_key: str | None = None,
         **options: Unpack[RequestOptions],
@@ -36,7 +37,7 @@ class Runs:
         response = self._transport.request(
             "POST",
             "/workflow/runs",
-            body=mutation_body(version_id, input),
+            body=mutation_body(version_id, deployment, input),
             idempotency_key=resolve_key(idempotency_key),
             options=options,
         )
@@ -61,6 +62,7 @@ class Runs:
         self,
         *,
         version_id: str | None = None,
+        deployment: str | None = None,
         status: WorkflowRunStatus | None = None,
         limit: int | None = None,
         offset: int | None = None,
@@ -69,7 +71,7 @@ class Runs:
         response = self._transport.request(
             "GET",
             "/workflow/runs",
-            query=list_query(version_id, status, limit, offset),
+            query=list_query(version_id, status, limit, offset, deployment),
             options=options,
         )
         return parse_page(response.data, response.status)
@@ -123,7 +125,8 @@ class AsyncRuns:
     async def start(
         self,
         *,
-        version_id: str,
+        deployment: str | None = None,
+        version_id: str | None = None,
         input: Mapping[str, Any] | None = None,
         idempotency_key: str | None = None,
         **options: Unpack[RequestOptions],
@@ -131,7 +134,7 @@ class AsyncRuns:
         response = await self._transport.request(
             "POST",
             "/workflow/runs",
-            body=mutation_body(version_id, input),
+            body=mutation_body(version_id, deployment, input),
             idempotency_key=resolve_key(idempotency_key),
             options=options,
         )
@@ -155,6 +158,7 @@ class AsyncRuns:
         self,
         *,
         version_id: str | None = None,
+        deployment: str | None = None,
         status: WorkflowRunStatus | None = None,
         limit: int | None = None,
         offset: int | None = None,
@@ -163,7 +167,7 @@ class AsyncRuns:
         response = await self._transport.request(
             "GET",
             "/workflow/runs",
-            query=list_query(version_id, status, limit, offset),
+            query=list_query(version_id, status, limit, offset, deployment),
             options=options,
         )
         return parse_page(response.data, response.status)

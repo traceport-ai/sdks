@@ -15,13 +15,22 @@ def resource_id(value: str, name: str) -> str:
     return value
 
 
-def mutation_body(version_id: str, input: Mapping[str, Any] | None) -> dict[str, Any]:
+def mutation_body(
+    version_id: str | None, deployment: str | None, input: Mapping[str, Any] | None
+) -> dict[str, Any]:
     if input is not None and not isinstance(input, Mapping):
         raise TypeError("input must be an object mapping strings to JSON values")
-    return {
-        "configVersionID": resource_id(version_id, "version_id"),
-        "additional": dict(input or {}),
-    }
+    if deployment is not None and version_id is None:
+        return {
+            "deployment": resource_id(deployment, "deployment"),
+            "additional": dict(input or {}),
+        }
+    if version_id is not None and deployment is None:
+        return {
+            "configVersionID": resource_id(version_id, "version_id"),
+            "additional": dict(input or {}),
+        }
+    raise TypeError("pass exactly one of deployment or version_id")
 
 
 def idempotency_key(key: str | None) -> str:
@@ -41,7 +50,11 @@ def idempotency_key(key: str | None) -> str:
 
 
 def list_query(
-    version_id: str | None, status: str | None, limit: int | None, offset: int | None
+    version_id: str | None,
+    status: str | None,
+    limit: int | None,
+    offset: int | None,
+    deployment: str | None = None,
 ) -> dict[str, str | int]:
     for value, name in ((limit, "limit"), (offset, "offset")):
         if value is not None and type(value) is not int:
@@ -50,6 +63,7 @@ def list_query(
         key: value
         for key, value in {
             "configVersionID": version_id,
+            "deployment": deployment,
             "status": status,
             "limit": limit,
             "offset": offset,

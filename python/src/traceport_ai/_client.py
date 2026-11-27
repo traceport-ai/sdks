@@ -1,7 +1,7 @@
 """The shared Traceport clients.
 
-A client owns configuration and HTTP only. Product subpackages (``traceport.workflows``, later
-``traceport.documents``) take a client in their constructor and send requests through it, so one
+A client owns configuration and HTTP only. Product subpackages (``traceport_ai.workflows``, later
+``traceport_ai.documents``) take a client in their constructor and send requests through it, so one
 client, configured once, serves every product.
 """
 
@@ -45,7 +45,7 @@ def _derived_settings(
 
 class Traceport:
     """Synchronous client shared by every product. Pass it to product classes such as
-    ``traceport.workflows.Workflows``.
+    ``traceport_ai.workflows.Workflows``.
 
     Use a context manager or ``close()`` to release owned connections.
     """
@@ -109,7 +109,7 @@ class Traceport:
 
 class AsyncTraceport:
     """AsyncIO client shared by every product. Pass it to async product classes such as
-    ``traceport.workflows.AsyncWorkflows``.
+    ``traceport_ai.workflows.AsyncWorkflows``.
 
     Use ``async with`` or ``await aclose()`` to release owned connections.
     """
@@ -174,10 +174,10 @@ def transport_of(client: Traceport) -> Transport:
     """Return a synchronous client's transport. Internal: used by product subpackages."""
     if isinstance(client, AsyncTraceport):
         raise TypeError(
-            "expected traceport.Traceport; use the Async product class with AsyncTraceport"
+            "expected traceport_ai.Traceport; use the Async product class with AsyncTraceport"
         )
     if not isinstance(client, Traceport):
-        raise TypeError("expected a traceport.Traceport client")
+        raise TypeError("expected a traceport_ai.Traceport client")
     return client._transport
 
 
@@ -185,8 +185,8 @@ def async_transport_of(client: AsyncTraceport) -> AsyncTransport:
     """Return an AsyncIO client's transport. Internal: used by product subpackages."""
     if isinstance(client, Traceport):
         raise TypeError(
-            "expected traceport.AsyncTraceport; use the sync product class with Traceport"
+            "expected traceport_ai.AsyncTraceport; use the sync product class with Traceport"
         )
     if not isinstance(client, AsyncTraceport):
-        raise TypeError("expected a traceport.AsyncTraceport client")
+        raise TypeError("expected a traceport_ai.AsyncTraceport client")
     return client._transport

@@ -1,6 +1,6 @@
 {
   "name": "@traceport/workflows",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Traceport workflows: execute saved workflows and manage durable runs.",
   "license": "Apache-2.0",
@@ -51,9 +51,9 @@
     "prepack": "cp ../../../LICENSE LICENSE && npm run build"
   },
   "peerDependencies": {
-    "@traceport/core": "^0.1.0"
+    "@traceport/core": "^0.0.1"
   },
   "devDependencies": {
-    "@traceport/core": "0.1.0"
+    "@traceport/core": "0.0.1"
   }
 }

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (Unreleased)
+## 0.0.1 (Unreleased)
 
 Initial release of module `github.com/traceport-ai/sdks/go`: package `traceport` (shared client)
 and product package `workflows`. This version has not been published.
@@ -16,6 +16,7 @@ and product package `workflows`. This version has not been published.
 ### Workflows and results
 
 - `workflows.New(client)` product service; `Execute` for synchronous execution of published workflow versions.
+- `StartParams.Deployment` runs whichever version is deployed to a stable code; `VersionID` pins one version. Exactly one is required (`*ValidationError` before sending otherwise). `Run.Deployment` and `ListRunsParams.Deployment` expose and filter by the code.
 - `Runs.Start`, `Get` and `List` for durable runs, including version/status filters and offset pagination.
 - `Runs.WaitForCompletion` with configurable observation timeout, request timeout and polling intervals.
 - Typed run, step, status, mode, page and billing-receipt resources; native timestamps, decimal-string billing amounts and generic JSON workflow values.

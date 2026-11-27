@@ -126,6 +126,28 @@ func TestWaitCallerCancellationAndRequestTimeout(t *testing.T) {
 	}
 }
 
+func TestStartRequiresExactlyOneTarget(t *testing.T) {
+	client := clientFor(t, func(*http.Request) (*http.Response, error) { t.Fatal("unexpected HTTP"); return nil, nil })
+	for name, params := range map[string]workflows.StartParams{
+		"both":             {VersionID: "00000000-0000-4000-8000-000000000001", Deployment: "support-triage-prod"},
+		"neither":          {},
+		"blank deployment": {Deployment: " "},
+	} {
+		for _, operation := range []string{"execute", "start"} {
+			var err error
+			if operation == "execute" {
+				_, err = workflows.New(client).Execute(context.Background(), params)
+			} else {
+				_, err = workflows.New(client).Runs.Start(context.Background(), params)
+			}
+			var invalid *traceport.ValidationError
+			if !errors.As(err, &invalid) {
+				t.Fatalf("%s/%s: err = %v, want ValidationError before HTTP", name, operation, err)
+			}
+		}
+	}
+}
+
 func TestWaitOptionsValidation(t *testing.T) {
 	client := clientFor(t, func(*http.Request) (*http.Response, error) { t.Fatal("unexpected HTTP"); return nil, nil })
 	for _, options := range []workflows.WaitOptions{{Timeout: -1}, {PollInterval: -1}, {MaxPollInterval: -1}} {

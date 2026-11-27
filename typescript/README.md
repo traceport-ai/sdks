@@ -2,7 +2,7 @@
 
 Official TypeScript packages for the [Traceport](https://traceport.ai) API.
 
-> **Status: 0.1.0 pre-release, unpublished.** Local checks pass; live API verification and publication remain pending.
+> **Status: 0.0.1 pre-release, unpublished.** Local checks pass; live API verification and publication remain pending.
 
 The SDK is modular: one shared client, and a package per product. Install only the products you use. Every product takes the same client, so you configure your API key, base URL, timeouts and retries once.
 
@@ -23,7 +23,7 @@ const client = new Traceport(); // reads TRACEPORT_API_KEY
 const workflows = new Workflows(client);
 
 const result = await workflows.execute({
-  versionId: "<workflow-version-id>",
+  deployment: "support-triage-prod", // or versionId: "<workflow-version-id>"
   input: { question: "What is Traceport?" },
 });
 ```
@@ -47,7 +47,7 @@ npm run build
 npm pack --workspaces
 
 # From your application:
-npm install /absolute/path/to/traceport-core-0.1.0.tgz /absolute/path/to/traceport-workflows-0.1.0.tgz
+npm install /absolute/path/to/traceport-core-0.0.1.tgz /absolute/path/to/traceport-workflows-0.0.1.tgz
 ```
 
 After publication: `npm install @traceport/core @traceport/workflows`. Add each further product package next to `@traceport/core`; there is no all-in-one package.
@@ -85,7 +85,7 @@ npm run check:package  # publint and attw for every package
 npm run examples
 ```
 
-Each package has its own version, `CHANGELOG.md` and release tag (`typescript/core/v0.1.0`, `typescript/workflows/v0.1.0`). Product packages import shared building blocks from `@traceport/core/internal`, which is not public API and not covered by semantic versioning.
+Each package has its own version, `CHANGELOG.md` and release tag (`typescript/core/v0.0.1`, `typescript/workflows/v0.0.1`). Product packages import shared building blocks from `@traceport/core/internal`, which is not public API and not covered by semantic versioning.
 
 ## License
 

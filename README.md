@@ -12,9 +12,9 @@ URL, timeouts and retries are configured once. Adding a product later never need
 | ---------- | ----------------------------------------------- | ------------------------------------------- | -------------------------------------------------- |
 | TypeScript | `@traceport/core`                               | `@traceport/workflows`                      | Workflows implemented; locally verified            |
 | Go         | `github.com/traceport-ai/sdks/go` (`traceport`) | `github.com/traceport-ai/sdks/go/workflows` | Workflows implemented; locally verified            |
-| Python     | `traceport`                                     | `traceport.workflows`                       | Sync/async workflows implemented; locally verified |
+| Python     | `traceport-ai` (import `traceport_ai`)          | `traceport_ai.workflows`                    | Sync/async workflows implemented; locally verified |
 
-Docs: [TypeScript](./typescript/README.md) · [Go](./go/README.md) ([changelog](./go/CHANGELOG.md)) · [Python](./python/README.md) ([changelog](./python/CHANGELOG.md)). TypeScript packages each have their own README and changelog under `typescript/packages/`. npm scope and PyPI name ownership are not yet reserved.
+Docs: [TypeScript](./typescript/README.md) · [Go](./go/README.md) ([changelog](./go/CHANGELOG.md)) · [Python](./python/README.md) ([changelog](./python/CHANGELOG.md)). TypeScript packages each have their own README and changelog under `typescript/packages/`. The npm scope is not yet reserved; the PyPI name `traceport-ai` is free but not yet registered.
 
 | Language   | Create the client                            | Use workflows                                                |
 | ---------- | -------------------------------------------- | ------------------------------------------------------------ |
@@ -41,7 +41,7 @@ conformance/   Live-server scenarios run by every SDK against a real Traceport A
 scripts/       Repository tooling (contract export, validation)
 typescript/    TypeScript npm workspace: packages/core, packages/workflows
 go/            Go module: package traceport (client) and package workflows
-python/        Python distribution: traceport (client) and traceport.workflows
+python/        Python distribution traceport-ai: traceport_ai (client) and traceport_ai.workflows
 ```
 
 The contract and fixtures are shared. A behavior change lands in `contract/` or `fixtures/` first, then in each language.

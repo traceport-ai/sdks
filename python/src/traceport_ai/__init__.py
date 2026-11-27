@@ -2,13 +2,13 @@
 
 Create one client and pass it to each product you use::
 
-    from traceport import Traceport
-    from traceport.workflows import Workflows
+    from traceport_ai import Traceport
+    from traceport_ai.workflows import Workflows
 
     client = Traceport()  # reads TRACEPORT_API_KEY
     workflows = Workflows(client)
 
-Products live in subpackages (``traceport.workflows``, later ``traceport.documents``); each takes
+Products live in subpackages (``traceport_ai.workflows``, later ``traceport_ai.documents``); each takes
 the same client, so credentials, base URL, timeouts and retries are configured once.
 """
 

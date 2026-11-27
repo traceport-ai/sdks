@@ -1,13 +1,14 @@
 /**
  * Run a workflow and wait for its result in one request.
  *
- *   TRACEPORT_API_KEY=... TRACEPORT_VERSION_ID=... npx tsx examples/execute.ts
+ *   TRACEPORT_API_KEY=... TRACEPORT_DEPLOYMENT=support-triage-prod npx tsx examples/execute.ts
  */
 
 import { APIError, ConflictError, Traceport } from "@traceport/core";
 import { Workflows } from "@traceport/workflows";
 
-const versionId = process.env.TRACEPORT_VERSION_ID ?? "";
+// A deployment code keeps working when a new version is deployed to it.
+const deployment = process.env.TRACEPORT_DEPLOYMENT ?? "";
 
 // One client for every Traceport product; each product package takes it.
 const client = new Traceport();
@@ -15,7 +16,7 @@ const workflows = new Workflows(client);
 
 try {
   const result = await workflows.execute({
-    versionId,
+    deployment,
     input: { question: "What is Traceport AI?" },
   });
 

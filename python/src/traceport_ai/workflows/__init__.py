@@ -1,12 +1,12 @@
 """Traceport workflows product: run saved workflows synchronously or as durable runs.
 
-Takes the shared client from the top-level ``traceport`` package::
+Takes the shared client from the top-level ``traceport_ai`` package::
 
-    from traceport import Traceport
-    from traceport.workflows import Workflows
+    from traceport_ai import Traceport
+    from traceport_ai.workflows import Workflows
 
     workflows = Workflows(Traceport())
-    result = workflows.execute(version_id=version_id, input={"question": "Hi"})
+    result = workflows.execute(deployment="support-triage-prod", input={"question": "Hi"})
 """
 
 from .errors import WaitTimeoutError, WorkflowFailedError

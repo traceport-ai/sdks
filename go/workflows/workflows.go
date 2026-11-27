@@ -15,12 +15,24 @@ type Service struct {
 }
 
 func startBody(params StartParams) (any, error) {
-	if err := core.ValidateID(params.VersionID, "versionId"); err != nil {
-		return nil, err
+	if (params.Deployment == "") == (params.VersionID == "") {
+		return nil, core.Invalid("deployment", "set exactly one of Deployment or VersionID")
 	}
 	input := params.Input
 	if input == nil {
 		input = map[string]any{}
+	}
+	if params.Deployment != "" {
+		if err := core.ValidateID(params.Deployment, "deployment"); err != nil {
+			return nil, err
+		}
+		return struct {
+			Deployment string         `json:"deployment"`
+			Input      map[string]any `json:"additional"`
+		}{params.Deployment, input}, nil
+	}
+	if err := core.ValidateID(params.VersionID, "versionId"); err != nil {
+		return nil, err
 	}
 	return struct {
 		VersionID string         `json:"configVersionID"`

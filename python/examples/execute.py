@@ -1,9 +1,9 @@
-"""Set TRACEPORT_API_KEY and TRACEPORT_VERSION_ID, then run this example."""
+"""Set TRACEPORT_API_KEY and TRACEPORT_DEPLOYMENT (a deployment code), then run this example."""
 
 import os
 
-from traceport import Traceport
-from traceport.workflows import Workflows
+from traceport_ai import Traceport
+from traceport_ai.workflows import Workflows
 
 
 def main() -> None:
@@ -11,7 +11,7 @@ def main() -> None:
     with Traceport() as client:
         workflows = Workflows(client)
         result = workflows.execute(
-            version_id=os.environ["TRACEPORT_VERSION_ID"],
+            deployment=os.environ["TRACEPORT_DEPLOYMENT"],
             input={"question": "What is Traceport?"},
         )
         if result.status == "failed":

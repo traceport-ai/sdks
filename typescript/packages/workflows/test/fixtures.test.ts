@@ -19,10 +19,15 @@ async function invoke(
   const url = new URL(fixture.request.path, "https://api.test");
   // Read-only operations have no body.
   const body = fixture.request.body as
-    { configVersionID: string; additional: Record<string, unknown> } | undefined;
+    | { configVersionID?: string; deployment?: string; additional: Record<string, unknown> }
+    | undefined;
   const key = fixture.request.headers?.["Idempotency-Key"];
   const options = key === undefined ? {} : { idempotencyKey: key };
-  const params = { versionId: body?.configVersionID ?? "", input: body?.additional ?? {} };
+  const input = body?.additional ?? {};
+  const params: products.WorkflowStartParams =
+    body?.deployment !== undefined
+      ? { deployment: body.deployment, input }
+      : { versionId: body?.configVersionID ?? "", input };
 
   switch (fixture.operation) {
     case "executeWorkflow":
@@ -35,6 +40,7 @@ async function invoke(
       const query = url.searchParams;
       const listParams: products.ListWorkflowRunsParams = {};
       if (query.has("configVersionID")) listParams.versionId = query.get("configVersionID")!;
+      if (query.has("deployment")) listParams.deployment = query.get("deployment")!;
       if (query.has("status"))
         listParams.status = query.get("status") as products.WorkflowRunStatus;
       if (query.has("limit")) listParams.limit = Number(query.get("limit"));

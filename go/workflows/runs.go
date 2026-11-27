@@ -47,6 +47,9 @@ func (service *RunsService) List(ctx context.Context, params ListRunsParams, opt
 	if params.VersionID != "" {
 		query.Set("configVersionID", params.VersionID)
 	}
+	if params.Deployment != "" {
+		query.Set("deployment", params.Deployment)
+	}
 	if params.Status != "" {
 		query.Set("status", string(params.Status))
 	}

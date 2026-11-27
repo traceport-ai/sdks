@@ -51,7 +51,7 @@
         },
         "responses": {
           "400": {
-            "description": "Invalid request JSON/UUID or typed workflow/input validation failure. Typed validation uses validation_error; legacy request-decoding errors can return a masked message with traceport-0000.",
+            "description": "Invalid request JSON/UUID, typed workflow/input validation failure, or inactive production version (workflow_version_inactive).",
             "content": {
               "application/json": {
                 "schema": {
@@ -91,11 +91,19 @@
             }
           },
           "409": {
-            "description": "Idempotency conflict, a run still in progress, missing/inactive version, revision conflict, or another execution-request error. An in-progress response includes the existing run ID in the error message. errorCode can be empty; no structured existingRunId field is returned.",
+            "description": "Changed-body idempotency replay (idempotency_conflict), in-flight replay (workflow_run_in_progress), or a revision/state conflict. An in-flight replay returns data.runId and Location for the original run. A deployment code with no version deployed returns deployment_empty.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "Original organization-scoped run resource on an in-flight replay.",
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -106,6 +114,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WorkflowExecuteEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Config or version not found in the caller organization (config_version_not_found). An unknown deployment code, or one owned by another organization, returns deployment_not_found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Workflow executor or billing policy temporarily unavailable (workflow_executor_unavailable or workflow_billing_unavailable).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunError"
                 }
               }
             }
@@ -240,7 +268,7 @@
             }
           },
           "409": {
-            "description": "The idempotency key was reused with a different request (idempotency_conflict), or the saved version changed during validation (revision_conflict).",
+            "description": "The idempotency key was reused with a different request (idempotency_conflict), or the saved version changed during validation (revision_conflict). A deployment code with no version deployed returns deployment_empty.",
             "content": {
               "application/json": {
                 "schema": {
@@ -250,7 +278,7 @@
             }
           },
           "404": {
-            "description": "Version absent or owned by another organization; errorCode is workflow_version_not_found.",
+            "description": "Version absent or owned by another organization; errorCode is workflow_version_not_found. An unknown deployment code, or one owned by another organization, returns deployment_not_found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -305,6 +333,15 @@
           },
           {
             "in": "query",
+            "name": "deployment",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]{1,62}$"
+            },
+            "description": "Only runs started through this deployment code."
+          },
+          {
+            "in": "query",
             "name": "status",
             "schema": {
               "type": "string",
@@ -340,7 +377,7 @@
         ],
         "responses": {
           "400": {
-            "description": "Invalid version UUID, status, limit or offset; errorCode is validation_error. Limit must be 1–100 and offset 0–1000000.",
+            "description": "Invalid version UUID, deployment code, status, limit or offset; errorCode is validation_error. Limit must be 1–100 and offset 0–1000000.",
             "content": {
               "application/json": {
                 "schema": {
@@ -493,13 +530,16 @@
       "WorkflowExecuteRequest": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "configVersionID"
-        ],
         "properties": {
           "configVersionID": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Pin an exact version. It must be active. Send exactly one of configVersionID or deployment."
+          },
+          "deployment": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,62}$",
+            "description": "Stable deployment code; runs whichever version is currently deployed to it. Send exactly one of configVersionID or deployment."
           },
           "additional": {
             "type": "object",
@@ -507,7 +547,19 @@
             "default": {},
             "nullable": true
           }
-        }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "configVersionID"
+            ]
+          },
+          {
+            "required": [
+              "deployment"
+            ]
+          }
+        ]
       },
       "WorkflowExecutionResult": {
         "type": "object",
@@ -557,6 +609,10 @@
           "configVersionID": {
             "type": "string",
             "format": "uuid"
+          },
+          "deployment": {
+            "type": "string",
+            "description": "Deployment code the run was started through; absent when it was started by configVersionID."
           },
           "revision": {
             "type": "integer",
@@ -686,7 +742,14 @@
         "properties": {
           "data": {
             "type": "object",
-            "nullable": true
+            "nullable": true,
+            "properties": {
+              "runId": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Original run ID for workflow_run_in_progress responses."
+              }
+            }
           },
           "status": {
             "type": "integer"
@@ -699,7 +762,7 @@
             "description": "Machine-readable code when available; may be empty. Authentication can return traceport-0000."
           }
         },
-        "description": "Request failure envelope. data is normally null and errorCode can be empty. Do not infer a different HTTP status from the message. A request ID is available only when the server sends x-request-id."
+        "description": "Request failure envelope. data is normally null; an in-flight synchronous or draft replay returns data.runId and a Location header. Messages for known workflow errors contain no wrapped internal details."
       },
       "WorkflowRunListEnvelope": {
         "type": "object",

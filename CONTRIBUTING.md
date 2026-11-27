@@ -14,7 +14,7 @@ Each language follows the same rule: **one shared client (core) and one module p
 
 - TypeScript: an npm workspace. `packages/core` (`@traceport/core`), and one package per product such as `packages/workflows` (`@traceport/workflows`, with core as a peer dependency). There is no all-in-one package: applications install core plus the products they use. Products use `@traceport/core/internal`, which is not public API. Tests live in each package's `test/`; shared test helpers in `test-utils/`.
 - Go: one module. The root package `traceport` is core (public client, options, errors); each product is a package such as `workflows/`; shared infrastructure is in `internal/core/`; public-interface tests are in `test/`.
-- Python: one distribution. `src/traceport/` is core (`_client.py`, `_core/`); each product is a subpackage such as `src/traceport/workflows/`. Product-specific dependencies go in an extra (`traceport[documents]`). Tests are in `tests/`, with a `pyproject.toml` and a development `uv.lock`.
+- Python: one distribution, `traceport-ai` on PyPI, imported as `traceport_ai`. `src/traceport_ai/` is core (`_client.py`, `_core/`); each product is a subpackage such as `src/traceport_ai/workflows/`. Product-specific dependencies go in an extra (`traceport-ai[documents]`). Tests are in `tests/`, with a `pyproject.toml` and a development `uv.lock`.
 
 To add a product, create its module in all three languages, take the core client in its constructor, and add its fixtures under `fixtures/<product>/`.
 
@@ -39,7 +39,7 @@ One pull request may change the contract, fixtures and all three SDKs together w
 ## Versioning and releases
 
 - Each SDK is versioned independently with [Semantic Versioning](https://semver.org/). All SDKs start at `0.x` until their first stable release.
-- Release tags are prefixed with the folder (and, for TypeScript, the package) name: `typescript/core/v0.1.0`, `typescript/workflows/v0.1.0`, `go/v0.1.0`, `python/v0.1.0`. Go requires the `go/` prefix to resolve module versions in a subdirectory. Go and Python version all their product packages together.
+- Release tags are prefixed with the folder (and, for TypeScript, the package) name: `typescript/core/v0.0.1`, `typescript/workflows/v0.0.1`, `go/v0.0.1`, `python/v0.0.1`. Go requires the `go/` prefix to resolve module versions in a subdirectory. Go and Python version all their product packages together.
 - A TypeScript product's `peerDependencies` range on `@traceport/core` must cover the core version it is tested with.
 - Packages are published only from GitHub Actions through OIDC (npm provenance, PyPI trusted publishing), gated by a protected `release` environment. No long-lived registry tokens.
 

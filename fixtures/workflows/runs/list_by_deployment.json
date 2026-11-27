@@ -1,0 +1,75 @@
+{
+  "name": "workflows.runs.list.by_deployment",
+  "description": "List runs started through one deployment code.",
+  "operation": "listWorkflowRuns",
+  "source": {
+    "kind": "derived",
+    "from": "traceport-apis@bf9256751d71 feat/workflow_deployment (uncommitted MGMT-08 changes): internal/transport/http/handlers/server/handler.go, internal/transport/http/handlers/server/workflow_runs.go, internal/transport/http/handlers/shared/errors.go, internal/usecase/executions/usecase.go, internal/transport/http/dto/workflow_run.go. Replace with a recording once a server runs this build."
+  },
+  "request": {
+    "method": "GET",
+    "path": "/v1/workflow/runs?deployment=support-triage-prod&limit=2&offset=0",
+    "headers": {}
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": {
+        "items": [
+          {
+            "billing": {
+              "method": "included",
+              "periodMonth": "2026-11",
+              "currency": "USD",
+              "amountUsd": "0.0000"
+            },
+            "id": "00000000-0000-4000-8000-000000000003",
+            "configVersionID": "00000000-0000-4000-8000-000000000001",
+            "deployment": "support-triage-prod",
+            "revision": 1,
+            "status": "succeeded",
+            "mode": "production",
+            "source": "api_async",
+            "createdAt": "2026-11-13T13:21:39.820011Z",
+            "startedAt": "2026-11-13T13:21:39.823543Z",
+            "finishedAt": "2026-11-13T13:21:39.825373Z"
+          },
+          {
+            "billing": {
+              "method": "included",
+              "periodMonth": "2026-11",
+              "currency": "USD",
+              "amountUsd": "0.0000"
+            },
+            "id": "00000000-0000-4000-8000-000000000004",
+            "configVersionID": "00000000-0000-4000-8000-000000000001",
+            "deployment": "support-triage-prod",
+            "revision": 1,
+            "status": "succeeded",
+            "mode": "production",
+            "source": "api_sync",
+            "createdAt": "2026-11-13T13:21:39.804545Z",
+            "startedAt": "2026-11-13T13:21:39.805218Z",
+            "finishedAt": "2026-11-13T13:21:39.807027Z"
+          }
+        ],
+        "limit": 2,
+        "offset": 0
+      },
+      "error": "",
+      "status": 200,
+      "errorCode": ""
+    }
+  },
+  "expect": {
+    "kind": "resource",
+    "resource": {
+      "itemCount": 2,
+      "limit": 2,
+      "offset": 0
+    }
+  }
+}

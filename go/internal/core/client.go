@@ -10,7 +10,7 @@ import (
 
 const (
 	// Version is the SDK's pre-release version.
-	Version = "0.1.0"
+	Version = "0.0.1"
 	// DefaultBaseURL includes the public API version prefix.
 	DefaultBaseURL = "https://api.traceport.ai/v1"
 )

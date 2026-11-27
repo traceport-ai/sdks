@@ -3,7 +3,7 @@ from urllib.parse import parse_qsl
 
 import pytest
 
-import traceport
+import traceport_ai
 
 from .helpers import fixtures
 
@@ -19,20 +19,20 @@ async def test_shared_fixture(make, fixture):
     url = fixture["request"]["path"]
     operation = fixture["operation"]
 
+    target = (
+        {"deployment": params["deployment"]}
+        if "deployment" in params
+        else {"version_id": params.get("configVersionID")}
+    )
+
     async def invoke():
         if operation == "executeWorkflow":
             return await h.call(
-                h.workflows.execute,
-                version_id=params["configVersionID"],
-                input=params.get("additional"),
-                **options,
+                h.workflows.execute, **target, input=params.get("additional"), **options
             )
         if operation == "startWorkflowRun":
             return await h.call(
-                h.workflows.runs.start,
-                version_id=params["configVersionID"],
-                input=params.get("additional"),
-                **options,
+                h.workflows.runs.start, **target, input=params.get("additional"), **options
             )
         if operation == "getWorkflowRun":
             return await h.call(h.workflows.runs.get, url.rsplit("/", 1)[-1])
@@ -40,6 +40,7 @@ async def test_shared_fixture(make, fixture):
         filters = {}
         for wire, name in (
             ("configVersionID", "version_id"),
+            ("deployment", "deployment"),
             ("status", "status"),
             ("limit", "limit"),
             ("offset", "offset"),
@@ -50,10 +51,10 @@ async def test_shared_fixture(make, fixture):
 
     if expected["kind"] == "error":
         spec = expected["error"]
-        with pytest.raises(getattr(traceport, spec["class"])) as caught:
+        with pytest.raises(getattr(traceport_ai, spec["class"])) as caught:
             await invoke()
         error = caught.value
-        assert isinstance(error, traceport.APIError)
+        assert isinstance(error, traceport_ai.APIError)
         assert error.status == spec["status"]
         assert error.error_code == spec["errorCode"]
         assert error.retryable == spec["retryable"]
