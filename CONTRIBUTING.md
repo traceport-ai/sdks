@@ -48,7 +48,7 @@ Each SDK is versioned independently with [Semantic Versioning](https://semver.or
 ## CI
 
 - `repo.yml` validates the contract snapshot, fixtures and workflow files on every pull request.
-- Each language gets its own workflow with path filters (for example `typescript/**`, `contract/**`, `fixtures/**`).
+- Each language gets its own workflow. Every pull request runs all of them, because they are required checks; pushes to `main` run only the languages whose files changed.
 - Pull-request jobs never use secrets. Live conformance tests run only on `main`, on a schedule or by manual dispatch, with a dedicated sandbox API key.
 - Third-party actions are pinned to a full commit SHA, with the version in a trailing comment. Dependabot keeps them current.
 - Only GitHub-hosted runners are used. Never add a self-hosted runner to this public repository.

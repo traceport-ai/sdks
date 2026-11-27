@@ -96,9 +96,6 @@ jobs:
     needs: [tag, test]
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: ${{ runner.temp }}
     env:
       MODULE: github.com/traceport-ai/sdks/go
       VERSION: ${{ needs.tag.outputs.version }}
@@ -108,6 +105,7 @@ jobs:
           go-version: stable
           cache: false
       - name: Ask the Go module proxy for the version
+        working-directory: ${{ runner.temp }}
         # The first request makes the proxy fetch the tag; pkg.go.dev then lists it within
         # minutes. Retry because GitHub can take a moment to serve a newly pushed tag.
         run: |
@@ -122,6 +120,7 @@ jobs:
           echo "::error::proxy.golang.org did not return ${MODULE}@v${VERSION}"
           exit 1
       - name: Install the release in a new module
+        working-directory: ${{ runner.temp }}
         # Uses the public proxy and checksum database, exactly as an application would.
         run: |
           mkdir consumer

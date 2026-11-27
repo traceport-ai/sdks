@@ -8,12 +8,9 @@ on:
       - "contract/**"
       - "fixtures/**"
       - ".github/workflows/typescript.yml"
+  # Every pull request runs every language so these checks can be required; a path filter
+  # would leave a required check waiting forever on pull requests that skip it.
   pull_request:
-    paths:
-      - "typescript/**"
-      - "contract/**"
-      - "fixtures/**"
-      - ".github/workflows/typescript.yml"
 
 permissions:
   contents: read
