@@ -2,7 +2,7 @@
 
 Official Traceport client libraries for TypeScript, Go and Python, maintained in one repository.
 
-> **Status: pre-release.** No package has been published yet. Nothing here is ready for production use.
+> **Status: early releases (0.0.x).** The APIs may change before 1.0.
 
 Every SDK has the same shape: **one shared client and a module per product**. You install or
 import only the products you use, and every product takes the same client, so the API key, base
@@ -10,11 +10,11 @@ URL, timeouts and retries are configured once. Adding a product later never need
 
 | Language   | Shared client                                   | Workflows product                           | Status                                             |
 | ---------- | ----------------------------------------------- | ------------------------------------------- | -------------------------------------------------- |
-| TypeScript | `@traceport/core`                               | `@traceport/workflows`                      | Workflows implemented; locally verified            |
-| Go         | `github.com/traceport-ai/sdks/go` (`traceport`) | `github.com/traceport-ai/sdks/go/workflows` | Workflows implemented; locally verified            |
-| Python     | `traceport-ai` (import `traceport_ai`)          | `traceport_ai.workflows`                    | Sync/async workflows implemented; locally verified |
+| TypeScript | `@traceport/core`                               | `@traceport/workflows`                      | 0.0.1 on npm                                       |
+| Go         | `github.com/traceport-ai/sdks/go` (`traceport`) | `github.com/traceport-ai/sdks/go/workflows` | 0.0.1, tag `go/v0.0.1`                             |
+| Python     | `traceport-ai` (import `traceport_ai`)          | `traceport_ai.workflows`                    | Sync/async implemented; not yet on PyPI            |
 
-Docs: [TypeScript](./typescript/README.md) · [Go](./go/README.md) ([changelog](./go/CHANGELOG.md)) · [Python](./python/README.md) ([changelog](./python/CHANGELOG.md)). TypeScript packages each have their own README and changelog under `typescript/packages/`. The npm scope is not yet reserved; the PyPI name `traceport-ai` is free but not yet registered.
+Docs: [TypeScript](./typescript/README.md) · [Go](./go/README.md) ([changelog](./go/CHANGELOG.md)) · [Python](./python/README.md) ([changelog](./python/CHANGELOG.md)). TypeScript packages each have their own README and changelog under `typescript/packages/`.
 
 | Language   | Create the client                            | Use workflows                                                |
 | ---------- | -------------------------------------------- | ------------------------------------------------------------ |
@@ -30,7 +30,7 @@ Each workflows product supports execution and durable runs, including bounded po
 existing runs.
 
 Document parsing and Human input remain planned. Document parsing will ship as its own
-product module in each language (taking the same client) after the backend APIs exist. Live conformance and publication remain pending for all clients.
+product module in each language (taking the same client) after the backend APIs exist. Live-server conformance tests remain pending for all clients.
 
 ## Repository layout
 
@@ -55,7 +55,8 @@ The contract and fixtures are shared. A behavior change lands in `contract/` or 
 
 ## Contributing and security
 
-- [CONTRIBUTING.md](./CONTRIBUTING.md): layout rules, commits, releases and CI.
+- [CONTRIBUTING.md](./CONTRIBUTING.md): layout rules, commits, pull requests and CI.
+- [RELEASING.md](./RELEASING.md): how maintainers publish each SDK.
 - [SECURITY.md](./SECURITY.md): how to report a vulnerability privately.
 
 ## License

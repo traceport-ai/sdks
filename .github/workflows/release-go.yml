@@ -1,0 +1,155 @@
+# Checks a Go module release tag and makes that version available through the Go module proxy.
+#
+# For Go, the pushed tag is the release. There is no registry upload: the Go module proxy
+# fetches the tag from GitHub the first time anyone asks for that version, and the Go checksum
+# database then records its contents permanently. Approving a run cannot stop a tag that is
+# already public, so the release gate is the tag ruleset (only maintainers can create `go/v*`
+# tags). This workflow checks the tag first and asks the proxy for the version only when every
+# check passes, then installs it in a new module to prove it resolves.
+name: release-go
+
+on:
+  push:
+    tags:
+      - "go/v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-go-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: go
+
+jobs:
+  tag:
+    name: check ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check the tag matches the SDK version
+        id: tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#go/v}"
+          if ! printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::$TAG is not go/v<semantic version>"
+            exit 1
+          fi
+          # core.Version is sent in the User-Agent header, so it must match the tag.
+          declared="$(sed -n 's/^[[:space:]]*Version = "\(.*\)"$/\1/p' internal/core/client.go)"
+          if [ "$declared" != "$version" ]; then
+            echo "::error::$TAG does not match Version \"$declared\" in go/internal/core/client.go"
+            exit 1
+          fi
+          # Go requires major versions 2 and above to end the module path in /vN.
+          major="${version%%.*}"
+          module="$(sed -n 's/^module //p' go.mod)"
+          if [ "$major" -ge 2 ] && [ "${module##*/}" != "v$major" ]; then
+            echo "::error::version $version needs module path ending in /v$major (go.mod has $module)"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Check the tag is on main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::${GITHUB_REF_NAME} points at a commit that is not on main"
+            exit 1
+          fi
+
+  test:
+    name: test (Go ${{ matrix.go }})
+    needs: tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: true
+      matrix:
+        go: ["1.22.x", "stable"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ${{ matrix.go }}
+          cache: false
+      - name: Check formatting
+        run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go test -race ./...
+      - run: go build ./...
+
+  announce:
+    name: announce v${{ needs.tag.outputs.version }}
+    needs: [tag, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ${{ runner.temp }}
+    env:
+      MODULE: github.com/traceport-ai/sdks/go
+      VERSION: ${{ needs.tag.outputs.version }}
+    steps:
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          cache: false
+      - name: Ask the Go module proxy for the version
+        # The first request makes the proxy fetch the tag; pkg.go.dev then lists it within
+        # minutes. Retry because GitHub can take a moment to serve a newly pushed tag.
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS "https://proxy.golang.org/${MODULE}/@v/v${VERSION}.info"; then
+              echo
+              exit 0
+            fi
+            echo "proxy does not have v${VERSION} yet (attempt ${attempt})"
+            sleep 10
+          done
+          echo "::error::proxy.golang.org did not return ${MODULE}@v${VERSION}"
+          exit 1
+      - name: Install the release in a new module
+        # Uses the public proxy and checksum database, exactly as an application would.
+        run: |
+          mkdir consumer
+          cd consumer
+          go mod init example.com/consumer
+          cat > main.go <<'EOF'
+          package main
+
+          import (
+          	"fmt"
+
+          	traceport "github.com/traceport-ai/sdks/go"
+          	"github.com/traceport-ai/sdks/go/workflows"
+          )
+
+          func main() {
+          	client, err := traceport.NewClient(traceport.WithAPIKey("tp_release_check"))
+          	if err != nil {
+          		panic(err)
+          	}
+          	_ = workflows.New(client)
+          	fmt.Println(traceport.Version)
+          }
+          EOF
+          go get "${MODULE}@v${VERSION}"
+          installed="$(go run .)"
+          if [ "$installed" != "$VERSION" ]; then
+            echo "::error::installed module reports Version $installed, expected $VERSION"
+            exit 1
+          fi
+          echo "${MODULE}@v${VERSION} installs and builds"

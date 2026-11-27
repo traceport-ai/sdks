@@ -2,8 +2,7 @@
 
 Standard-library-only Go SDK for the Traceport API. Requires Go 1.22+.
 
-**0.0.1 pre-release, unpublished.** Local unit/fixture verification is complete; live-server
-conformance and a versioned module release remain pending. The module path is
+**Status: 0.0.1, early release.** The API may change before 1.0. The module path is
 `github.com/traceport-ai/sdks/go`.
 
 The SDK is modular: one shared client and a package per product. Go compiles only the
@@ -21,18 +20,21 @@ supports workflow execution and durable runs; document parsing, Human input, eve
 and workflow cancellation are not included. See the [changelog](https://github.com/traceport-ai/sdks/blob/main/go/CHANGELOG.md)
 for the complete first-release feature set.
 
-## Local use
+## Install
 
-Until the first release, add a replacement in your application's `go.mod`:
-
-```text
-require github.com/traceport-ai/sdks/go v0.0.0
-
-replace github.com/traceport-ai/sdks/go => /absolute/path/to/sdks/go
+```bash
+go get github.com/traceport-ai/sdks/go@v0.0.1
 ```
 
-After publication, install with `go get github.com/traceport-ai/sdks/go@v0.0.1`.
-Subdirectory release tags must have the `go/` prefix, for example `go/v0.0.1`.
+This one module contains the shared client and every product package. Release tags have
+the `go/` prefix because the module lives in the repository's `go/` folder, for example
+`go/v0.0.1`.
+
+To try unreleased changes from a checkout, point your application's `go.mod` at it:
+
+```text
+replace github.com/traceport-ai/sdks/go => /absolute/path/to/sdks/go
+```
 
 ## Execute a workflow
 

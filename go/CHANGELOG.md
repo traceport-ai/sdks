@@ -1,9 +1,9 @@
 # Changelog
 
-## 0.0.1 (Unreleased)
+## 0.0.1
 
 Initial release of module `github.com/traceport-ai/sdks/go`: package `traceport` (shared client)
-and product package `workflows`. This version has not been published.
+and product package `workflows`.
 
 ### Client and configuration
 

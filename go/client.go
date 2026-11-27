@@ -3,7 +3,7 @@ package traceport
 import "github.com/traceport-ai/sdks/go/internal/core"
 
 const (
-	// Version is the SDK's pre-release version.
+	// Version is the SDK release version, sent in the User-Agent header.
 	Version = core.Version
 	// DefaultBaseURL includes the public API version prefix.
 	DefaultBaseURL = core.DefaultBaseURL
