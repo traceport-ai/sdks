@@ -1,0 +1,155 @@
+# Publishes one TypeScript package to npm when its release tag is pushed:
+#   typescript/core/v<version>       -> @traceport/core
+#   typescript/workflows/v<version>  -> @traceport/workflows
+#
+# Publishing uses npm trusted publishing (GitHub OIDC), so no npm token is stored anywhere.
+# Each package must have this workflow and the `release` environment configured as its trusted
+# publisher on npmjs.com. The publish job waits for approval in the `release` environment.
+name: release-typescript
+
+on:
+  push:
+    tags:
+      - "typescript/core/v*"
+      - "typescript/workflows/v*"
+
+permissions:
+  contents: read
+
+# Never cancel a release that is already running.
+concurrency:
+  group: release-typescript-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: typescript
+
+jobs:
+  verify:
+    name: verify ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      package: ${{ steps.tag.outputs.package }}
+      version: ${{ steps.tag.outputs.version }}
+      published: ${{ steps.registry.outputs.published }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Full history so the tag can be checked against main.
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Read package and version from the tag
+        id: tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          folder="${TAG#typescript/}"
+          folder="${folder%%/v*}"
+          version="${TAG##*/v}"
+          case "$folder" in
+            core | workflows) ;;
+            *) echo "::error::unknown package in tag $TAG"; exit 1 ;;
+          esac
+          manifest="packages/$folder/package.json"
+          name="$(node -p "require('./$manifest').name")"
+          declared="$(node -p "require('./$manifest').version")"
+          if [ "$declared" != "$version" ]; then
+            echo "::error::tag $TAG is version $version but $manifest says $declared"
+            exit 1
+          fi
+          if [ "$(node -p "require('./$manifest').private === true")" = "true" ]; then
+            echo "::error::$manifest is marked private"
+            exit 1
+          fi
+          echo "package=$name" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Require the tag to be on main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::release tags must point at a commit on main"
+            exit 1
+          fi
+
+      - name: Check whether this version is already on npm
+        id: registry
+        env:
+          PACKAGE: ${{ steps.tag.outputs.package }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          if npm view "$PACKAGE@$VERSION" version > /dev/null 2>&1; then
+            echo "::notice::$PACKAGE@$VERSION is already published; nothing to do"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm run smoke
+      - run: npm run check:package
+
+  publish:
+    name: publish ${{ needs.verify.outputs.package }}@${{ needs.verify.outputs.version }}
+    needs: verify
+    if: needs.verify.outputs.published != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: read
+      # Lets npm exchange a GitHub OIDC token for a short-lived publish credential.
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+      - run: npm ci
+      # Trusted publishing needs npm 11.5.1 or newer.
+      - name: Check npm version
+        run: |
+          required=11.5.1
+          current="$(npm --version)"
+          if [ "$(printf '%s\n' "$required" "$current" | sort -V | head -n 1)" != "$required" ]; then
+            echo "::error::npm $current is too old for trusted publishing (needs $required or newer)"
+            exit 1
+          fi
+          echo "npm $current"
+      # prepack copies the license and rebuilds the package from this tag. npm attaches
+      # provenance automatically when the repository is public.
+      - name: Publish
+        env:
+          PACKAGE: ${{ needs.verify.outputs.package }}
+        run: npm publish --workspace "$PACKAGE"
+      - name: Confirm the version is live
+        env:
+          PACKAGE: ${{ needs.verify.outputs.package }}
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          for _ in 1 2 3 4 5 6; do
+            if npm view "$PACKAGE@$VERSION" version > /dev/null 2>&1; then
+              echo "$PACKAGE@$VERSION is live"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$PACKAGE@$VERSION was published but is not visible yet; check npmjs.com"
+          exit 1

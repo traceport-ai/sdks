@@ -2,10 +2,10 @@
 
 Run saved [Traceport](https://traceport.ai) workflows synchronously, or as durable background runs. Uses the shared client from [`@traceport/core`](https://github.com/traceport-ai/sdks/tree/main/typescript/packages/core).
 
-> **Status: 0.0.1 pre-release, unpublished.** Human input, events and run cancellation are not part of this version.
+> **Status: 0.0.1, early release.** The API may change before 1.0. Human input, events and run cancellation are not part of this version.
 
 ```sh
-npm install @traceport/core @traceport/workflows   # after publication
+npm install @traceport/core @traceport/workflows
 ```
 
 `@traceport/core` is a peer dependency: you install it once and every Traceport product shares it.

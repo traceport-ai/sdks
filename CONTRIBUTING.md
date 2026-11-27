@@ -43,6 +43,20 @@ One pull request may change the contract, fixtures and all three SDKs together w
 - A TypeScript product's `peerDependencies` range on `@traceport/core` must cover the core version it is tested with.
 - Packages are published only from GitHub Actions through OIDC (npm provenance, PyPI trusted publishing), gated by a protected `release` environment. No long-lived registry tokens.
 
+### Releasing a TypeScript package
+
+`release-typescript.yml` publishes one package per tag through npm trusted publishing. The very first version of each package (`0.0.1`) was published by hand, because npm only accepts a trusted publisher on a package that already exists.
+
+1. Bump `version` in the package's `package.json`. For `@traceport/core`, also bump `VERSION` in `packages/core/src/version.ts` and the `@traceport/core` peer and dev dependency in `packages/workflows/package.json` (`^0.0.x` ranges match one version only). Run `npm install` in `typescript/` to refresh the lockfile.
+2. Add the release to the package's `CHANGELOG.md`, open a pull request and merge it into `main`.
+3. Tag the merge commit on `main` and push the tag:
+
+   ```sh
+   git tag typescript/core/v0.0.2 && git push origin typescript/core/v0.0.2
+   ```
+
+4. Approve the `release` environment in the Actions run. The workflow refuses tags that are not on `main` or whose version differs from `package.json`, reruns every check, publishes, and confirms the version is live. It skips versions that are already on npm. Release core before any product that needs the new core version.
+
 ## CI
 
 - `repo.yml` validates the contract snapshot, fixtures and workflow files on every pull request.

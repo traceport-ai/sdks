@@ -1,7 +1,6 @@
 {
   "name": "@traceport/core",
   "version": "0.0.1",
-  "private": true,
   "description": "Shared client, transport and errors for the Traceport TypeScript SDK.",
   "license": "Apache-2.0",
   "author": "Shineport Innovations Private Limited",
@@ -62,6 +61,9 @@
     "CHANGELOG.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "check:package": "publint && attw --pack .",

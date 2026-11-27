@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.0.1 (Unreleased)
+## 0.0.1
 
-Initial release of `@traceport/core`. This version has not been published.
+Initial release of `@traceport/core`.
 
 ### Client and configuration
 

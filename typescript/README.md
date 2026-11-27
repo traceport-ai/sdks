@@ -2,7 +2,7 @@
 
 Official TypeScript packages for the [Traceport](https://traceport.ai) API.
 
-> **Status: 0.0.1 pre-release, unpublished.** Local checks pass; live API verification and publication remain pending.
+> **Status: 0.0.1, early release.** The API may change before 1.0.
 
 The SDK is modular: one shared client, and a package per product. Install only the products you use. Every product takes the same client, so you configure your API key, base URL, timeouts and retries once.
 
@@ -38,19 +38,13 @@ const workflows = new Workflows(client.withOptions({ timeout: 300_000, maxRetrie
 
 ## Install
 
-The packages are not on npm yet. Build and pack them from a checkout:
-
 ```sh
-# From sdks/typescript/
-npm ci
-npm run build
-npm pack --workspaces
-
-# From your application:
-npm install /absolute/path/to/traceport-core-0.0.1.tgz /absolute/path/to/traceport-workflows-0.0.1.tgz
+npm install @traceport/core @traceport/workflows
 ```
 
-After publication: `npm install @traceport/core @traceport/workflows`. Add each further product package next to `@traceport/core`; there is no all-in-one package.
+Add each further product package next to `@traceport/core`; there is no all-in-one package.
+
+To try an unreleased change, build and pack from a checkout (`npm ci && npm run build && npm pack --workspaces` in `typescript/`) and install the generated `.tgz` files.
 
 `@traceport/workflows` declares `@traceport/core` as a peer dependency, so an application always has a single copy of the client and error classes. If a product reports "expected a Traceport client", run `npm ls @traceport/core` and remove the duplicate version.
 

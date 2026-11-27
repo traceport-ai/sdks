@@ -1,7 +1,6 @@
 {
   "name": "@traceport/workflows",
   "version": "0.0.1",
-  "private": true,
   "description": "Traceport workflows: execute saved workflows and manage durable runs.",
   "license": "Apache-2.0",
   "author": "Shineport Innovations Private Limited",
@@ -45,6 +44,9 @@
     "CHANGELOG.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "check:package": "publint && attw --pack .",
