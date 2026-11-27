@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.0.1 (Unreleased)
+## 0.0.1
 
-Initial release of `@traceport/workflows`. This version has not been published. Requires `@traceport/core` ^0.0.1 (peer dependency).
+Initial release of `@traceport/workflows`. Requires `@traceport/core` ^0.0.1 (peer dependency).
 
 ### Workflows and results
 
