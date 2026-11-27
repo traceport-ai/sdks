@@ -33,12 +33,20 @@ export function requireId(value: string, name: string): string {
 
 /** Maps SDK parameters to the request body the API expects. */
 export function startBody(params: WorkflowStartParams): {
-  configVersionID: string;
+  configVersionID?: string;
+  deployment?: string;
   additional: Record<string, unknown>;
 } {
   // `params` may come from untyped JavaScript callers.
   if (!isRecord(params)) throw new TypeError("params must be an object");
   const input = params.input ?? {};
   if (!isRecord(input)) throw new TypeError("input must be a plain object");
-  return { configVersionID: requireId(params.versionId, "versionId"), additional: input };
+  const hasDeployment = params.deployment !== undefined;
+  const hasVersion = params.versionId !== undefined;
+  if (hasDeployment === hasVersion) {
+    throw new TypeError("pass exactly one of deployment or versionId");
+  }
+  return hasDeployment
+    ? { deployment: requireId(params.deployment, "deployment"), additional: input }
+    : { configVersionID: requireId(params.versionId, "versionId"), additional: input };
 }

@@ -78,6 +78,8 @@ export interface WorkflowRun {
   id: string;
   /** The workflow version the run executes. */
   configVersionID: string;
+  /** The deployment code the run was started through; absent when it was started by version ID. */
+  deployment?: string;
   /** Saved revision of that version, frozen when the run started. */
   revision: number;
   status: WorkflowRunStatus;
@@ -110,10 +112,26 @@ export interface WorkflowRunPage {
   offset: number;
 }
 
-/** Parameters shared by `workflows.execute` and `workflows.runs.start`. */
-export interface WorkflowStartParams {
-  /** ID of the active workflow version to run. Sent as `configVersionID`. */
+/**
+ * Parameters shared by `workflows.execute` and `workflows.runs.start`. Pass exactly one of
+ * `deployment` (recommended) or `versionId`.
+ */
+export type WorkflowStartParams = WorkflowStartByDeployment | WorkflowStartByVersion;
+
+/** Run whichever version is deployed to a code. Deploying a new version needs no code change. */
+export interface WorkflowStartByDeployment {
+  /** Deployment code, for example `"support-triage-prod"`. Sent as `deployment`. */
+  deployment: string;
+  versionId?: never;
+  /** Workflow input. Sent as `additional`. Defaults to `{}`. */
+  input?: Record<string, unknown>;
+}
+
+/** Pin one exact version. It must be live (deployed to at least one code). */
+export interface WorkflowStartByVersion {
+  /** ID of the workflow version to run. Sent as `configVersionID`. */
   versionId: string;
+  deployment?: never;
   /** Workflow input. Sent as `additional`. Defaults to `{}`. */
   input?: Record<string, unknown>;
 }
@@ -122,6 +140,8 @@ export interface WorkflowStartParams {
 export interface ListWorkflowRunsParams {
   /** Only runs of this workflow version. Sent as `configVersionID`. */
   versionId?: string;
+  /** Only runs started through this deployment code. */
+  deployment?: string;
   status?: WorkflowRunStatus;
   /** Page size, 1–100. The server default is 50. */
   limit?: number;

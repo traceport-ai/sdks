@@ -21,6 +21,7 @@ const schemas = loadContract().components.schemas;
 const RUN_FIELDS = [
   "id",
   "configVersionID",
+  "deployment",
   "revision",
   "status",
   "mode",
@@ -71,7 +72,7 @@ describe("public types match the contract", () => {
 
   it("start request fields", () => {
     expect(sorted(Object.keys(schemas.WorkflowExecuteRequest!.properties!))).toEqual(
-      sorted(["configVersionID", "additional"]),
+      sorted(["configVersionID", "deployment", "additional"]),
     );
   });
 });

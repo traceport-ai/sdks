@@ -1,0 +1,44 @@
+{
+  "name": "workflows.execute.deployment_not_found_404",
+  "description": "An unknown deployment code, or one owned by another organization, returns 404 deployment_not_found.",
+  "operation": "executeWorkflow",
+  "source": {
+    "kind": "derived",
+    "from": "traceport-apis@bf9256751d71 feat/workflow_deployment (uncommitted MGMT-08 changes): internal/transport/http/handlers/server/handler.go, internal/transport/http/handlers/server/workflow_runs.go, internal/transport/http/handlers/shared/errors.go, internal/usecase/executions/usecase.go, internal/transport/http/dto/workflow_run.go. Replace with a recording once a server runs this build."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/workflow/execute",
+    "headers": {
+      "Idempotency-Key": "fixture-exec-1"
+    },
+    "body": {
+      "deployment": "support-triage-prod",
+      "additional": {
+        "question": "SDK fixture answer",
+        "payload": {}
+      }
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": null,
+      "error": "deployment not found",
+      "status": 404,
+      "errorCode": "deployment_not_found"
+    }
+  },
+  "expect": {
+    "kind": "error",
+    "error": {
+      "class": "NotFoundError",
+      "status": 404,
+      "errorCode": "deployment_not_found",
+      "retryable": false
+    }
+  }
+}

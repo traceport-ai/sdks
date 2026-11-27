@@ -3,7 +3,8 @@
 Python 3.11+ Traceport SDK with synchronous `Traceport` and AsyncIO `AsyncTraceport`
 clients. The only direct runtime dependencies are HTTPX and Pydantic 2.
 
-**0.1.0 pre-release, unpublished.** The distribution/import name is `traceport`; registry
+**0.0.1 pre-release, unpublished.** The distribution name is `traceport-ai` and the import name is `traceport_ai` (the PyPI
+name `traceport_ai` belongs to an unrelated project); registry
 ownership, live-server conformance and publication remain release gates.
 
 The SDK is modular: one shared client and a subpackage per product. Every product takes
@@ -11,12 +12,12 @@ the same client, so the API key, base URL, timeouts and retries are configured o
 
 | Module | Contents |
 | --- | --- |
-| `traceport` | `Traceport` / `AsyncTraceport` clients, request options and request errors. |
-| `traceport.workflows` | `Workflows` / `AsyncWorkflows`: execute saved workflows and manage durable runs. |
+| `traceport_ai` | `Traceport` / `AsyncTraceport` clients, request options and request errors. |
+| `traceport_ai.workflows` | `Workflows` / `AsyncWorkflows`: execute saved workflows and manage durable runs. |
 
-Document parsing will ship as `traceport.documents`, taking the same client. Products that
+Document parsing will ship as `traceport_ai.documents`, taking the same client. Products that
 need extra dependencies will install them through an extra, for example
-`traceport[documents]`; workflows needs none.
+`traceport-ai[documents]`; workflows needs none.
 
 Use a Traceport API key and an active, published workflow version. This release
 supports workflow execution and durable runs; document parsing, Human input, events
@@ -32,8 +33,8 @@ python -m pip install .
 ```
 
 You can also install a locally built wheel with
-`python -m pip install /absolute/path/to/sdks/python/dist/traceport-0.1.0-py3-none-any.whl`.
-After publication, installation will be `python -m pip install traceport`.
+`python -m pip install /absolute/path/to/sdks/python/dist/traceport_ai-0.0.1-py3-none-any.whl`.
+After publication, installation will be `python -m pip install traceport-ai`.
 
 For development, use the checked-in dependency lock:
 
@@ -45,13 +46,13 @@ uv sync --locked --all-extras
 ## Synchronous execution
 
 ```python
-from traceport import Traceport
-from traceport.workflows import Workflows
+from traceport_ai import Traceport
+from traceport_ai.workflows import Workflows
 
 with Traceport() as client:  # TRACEPORT_API_KEY; optional TRACEPORT_BASE_URL
     workflows = Workflows(client)  # other products take the same client
     result = workflows.execute(
-        version_id="<published-workflow-version-id>",
+        deployment="support-triage-prod",  # or version_id="<workflow-version-id>"
         input={"question": "What is Traceport?"},
     )
     if result.status == "succeeded":
@@ -67,14 +68,14 @@ Request/authentication/network problems raise typed exceptions.
 
 ```python
 import asyncio
-from traceport import AsyncTraceport
-from traceport.workflows import AsyncWorkflows
+from traceport_ai import AsyncTraceport
+from traceport_ai.workflows import AsyncWorkflows
 
 
 async def main() -> None:
     async with AsyncTraceport() as client:
         result = await AsyncWorkflows(client).execute(
-            version_id="<published-workflow-version-id>",
+            deployment="support-triage-prod",
             input={"question": "Hello"},
         )
         print(result.status, result.output, result.error)
@@ -103,8 +104,8 @@ methods; await each call on `AsyncWorkflows`. Passing the wrong client type rais
 
 ```python
 import httpx
-from traceport import Traceport
-from traceport.workflows import Workflows
+from traceport_ai import Traceport
+from traceport_ai.workflows import Workflows
 
 with httpx.Client() as http:
     with Traceport(
@@ -165,19 +166,33 @@ workflows = Workflows(patient)
 The derived client borrows the original's connections and does not own them: closing it
 leaves the original open, and it stops working once the original is closed.
 
+## Deployment codes or version IDs
+
+Pass exactly one of:
+
+- `deployment` (recommended): a stable code such as `"support-triage-prod"`, created on the
+  workflow's Deployments tab in the dashboard. The server runs whichever version is deployed
+  to it, so shipping a new version needs no change in your code. An unknown code raises
+  `NotFoundError` (`deployment_not_found`); a code with nothing deployed raises
+  `ConflictError` (`deployment_empty`).
+- `version_id`: pins one exact version. It must be live (deployed to at least one code).
+
+Passing both or neither raises `TypeError` before any request is sent. Runs started by
+code carry it in `run.deployment`.
+
 ## Durable runs
 
 ```python
-from traceport import Traceport
-from traceport.workflows import WaitTimeoutError, Workflows, require_output
+from traceport_ai import Traceport
+from traceport_ai.workflows import WaitTimeoutError, Workflows, require_output
 
-version_id = "<published-workflow-version-id>"
+deployment = "support-triage-prod"
 job_id = "<persisted-logical-job-id>"
 
 with Traceport() as client:
     workflows = Workflows(client)
     run = workflows.runs.start(
-        version_id=version_id,
+        deployment=deployment,
         input={"question": "Hello"},
         idempotency_key=job_id,  # persist one key per logical operation
     )
@@ -197,7 +212,7 @@ with Traceport() as client:
 
     latest = workflows.runs.get(run.id)
     page = workflows.runs.list(
-        version_id=version_id,
+        deployment=deployment,
         status="failed",
         limit=20,
         offset=0,
@@ -219,7 +234,7 @@ when recovering the same start after a process restart.
 - Lists contain newest-first summaries without output/result. None pagination fields
   are omitted; an explicit zero is sent for the server to validate.
 
-List filters are `version_id`, `status`, `limit` and `offset`. The server defaults to
+List filters are `version_id`, `deployment`, `status`, `limit` and `offset`. The server defaults to
 limit 50 and offset 0; supported ranges are 1–100 and 0–1,000,000 respectively.
 Pages expose `items`, `limit` and `offset`, with no total or next-cursor field.
 Advance offset by the number of returned items; an empty or short page ends the scan.
@@ -229,7 +244,8 @@ Each page reflects the server's current history.
 
 Pydantic resources use Python names (`config_version_id`, `created_at`, `amount_usd`)
 with the original API aliases (`configVersionID`, `createdAt`, `amountUsd`). Parameters
-`version_id`/`input` become `configVersionID`/`additional`; omitted input sends `{}`.
+`deployment` or `version_id`, and `input`, become `deployment` or `configVersionID`, and
+`additional`; omitted input sends `{}`.
 
 `model_dump(by_alias=True, mode="json", exclude_none=True)` emits wire names and ISO timestamps. Datetime
 fields parse ISO timestamps, billing amounts remain decimal strings, and `model_extra`
@@ -237,7 +253,7 @@ retains additive server fields. Required resource fields/types are checked; malf
 success responses raise InvalidResponseError.
 
 Run statuses are `queued`, `running`, `succeeded`, `failed` and `interrupted`.
-`traceport.workflows` exports `WorkflowRun`, `WorkflowRunPage`, `WorkflowStep`,
+`traceport_ai.workflows` exports `WorkflowRun`, `WorkflowRunPage`, `WorkflowStep`,
 `WorkflowRunBilling`, `WorkflowResult` and their status/mode aliases. Optional billing
 receipts retain the payment method, period, currency, decimal amount and optional
 credit timestamp. The SDK-derived `result` field is excluded from wire serialization.
@@ -248,7 +264,7 @@ output remain available. Run `output` retains the stored body and `result` inter
 it using the same rules as Execute. Unrecognized stored-output objects remain readable
 without a derived result.
 
-Use `result.require_output()`, `run.require_output()` or `traceport.workflows.require_output` to opt into
+Use `result.require_output()`, `run.require_output()` or `traceport_ai.workflows.require_output` to opt into
 WorkflowFailedError. A failed exception retains the partial result and optional run ID.
 Successful summaries without output must first be read with runs.get.
 
@@ -257,7 +273,7 @@ validate and type its output. Decoder exceptions propagate unchanged:
 
 ```python
 from pydantic import BaseModel
-from traceport.workflows import require_output
+from traceport_ai.workflows import require_output
 
 
 class AnswerModel(BaseModel):
@@ -289,8 +305,8 @@ the execute endpoint. A finished replay returns its saved result.
 ## Errors
 
 ```python
-from traceport import APIError, NotFoundError, Traceport
-from traceport.workflows import Workflows
+from traceport_ai import APIError, NotFoundError, Traceport
+from traceport_ai.workflows import Workflows
 
 with Traceport() as client:
     try:
@@ -313,8 +329,8 @@ with an empty error code; a missing version does not always produce NotFoundErro
 that endpoint. The SDK preserves the server response.
 
 Other SDK errors: APIConnectionError, APITimeoutError, RequestAbortedError and
-InvalidResponseError from `traceport`, and WorkflowFailedError and WaitTimeoutError from
-`traceport.workflows`. All extend TraceportError;
+InvalidResponseError from `traceport_ai`, and WorkflowFailedError and WaitTimeoutError from
+`traceport_ai.workflows`. All extend TraceportError;
 network exceptions preserve their underlying `__cause__`. Async task cancellation and
 invalid local arguments retain their native Python exception semantics.
 
@@ -323,7 +339,7 @@ invalid local arguments retain their native Python exception semantics.
 ```text
 python/
   pyproject.toml, uv.lock
-  src/traceport/
+  src/traceport_ai/
     __init__.py, _client.py, py.typed   # shared clients, options and request errors
     _core/                      # shared configuration, errors and HTTP
     workflows/                  # workflows product: sync/async classes, types and results
@@ -336,7 +352,7 @@ python/
 uv run --locked --all-extras ruff check .
 uv run --locked --all-extras ruff format --check .
 uv run --locked --all-extras mypy
-uv run --locked --all-extras pytest --cov=traceport
+uv run --locked --all-extras pytest --cov=traceport_ai
 uv build
 uv run --locked --all-extras twine check dist/*
 uv run --locked --all-extras python scripts/check_package.py dist/*.whl

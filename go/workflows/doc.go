@@ -7,7 +7,7 @@
 //	client, err := traceport.NewClient() // github.com/traceport-ai/sdks/go
 //	if err != nil { ... }
 //	wf := workflows.New(client)
-//	result, err := wf.Execute(ctx, workflows.StartParams{VersionID: versionID})
+//	result, err := wf.Execute(ctx, workflows.StartParams{Deployment: "support-triage-prod"})
 //
 // Execute returns workflow failures as normal results with Status RunFailed; request
 // failures return the typed errors from the traceport package. RequireOutput opts into a

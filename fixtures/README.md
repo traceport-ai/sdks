@@ -16,6 +16,12 @@ repositories and usecases, whose dispatcher was deliberately left unstarted. Its
 were revoked after capture. These recordings do not certify deployed behavior or
 replace the SDK live-conformance gate.
 
+Five deployment-code cases are derived, not recorded: execute and start by
+`deployment`, list filtered by `deployment`, and the 404 `deployment_not_found` and
+409 `deployment_empty` errors. They come from the uncommitted `feat/workflow_deployment`
+backend (MGMT-08), which no running server serves yet. Record them over HTTP once one
+does, and replace the derived files.
+
 ## Recording another exchange
 
 Use only synthetic workflows and values. The recorder preserves business data and

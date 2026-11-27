@@ -17,11 +17,11 @@ import asyncio
 from importlib.metadata import version
 from pathlib import Path
 import httpx
-import traceport
-from traceport.workflows import AsyncWorkflows, Workflows, require_output
+import traceport_ai
+from traceport_ai.workflows import AsyncWorkflows, Workflows, require_output
 
-assert "/src/traceport/" not in str(Path(traceport.__file__).resolve())
-assert traceport.__version__ == version("traceport")
+assert "/src/traceport_ai/" not in str(Path(traceport_ai.__file__).resolve())
+assert traceport_ai.__version__ == version("traceport-ai")
 
 def handler(request):
     assert request.headers["authorization"] == "Bearer smoke-key"
@@ -29,7 +29,7 @@ def handler(request):
     return httpx.Response(200, json={"data": {"data": {"final": {"ok": True}}, "error": "", "steps": []}, "error": "", "status": 200, "errorCode": ""})
 
 with httpx.Client(transport=httpx.MockTransport(handler)) as http:
-    with traceport.Traceport(api_key="smoke-key", http_client=http) as sdk:
+    with traceport_ai.Traceport(api_key="smoke-key", http_client=http) as sdk:
         workflows = Workflows(sdk)
         assert workflows.execute(version_id="test-version").require_output() == {"ok": True}
         # A derived client shares the connection pool and products still accept it.
@@ -39,7 +39,7 @@ with httpx.Client(transport=httpx.MockTransport(handler)) as http:
 
 async def main():
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
-        async with traceport.AsyncTraceport(api_key="smoke-key", http_client=http) as sdk:
+        async with traceport_ai.AsyncTraceport(api_key="smoke-key", http_client=http) as sdk:
             result = await AsyncWorkflows(sdk).execute(version_id="test-version")
             assert require_output(result) == {"ok": True}
         assert not http.is_closed
@@ -53,12 +53,12 @@ def check(wheel: Path, uv: str, offline: bool) -> None:
     with zipfile.ZipFile(wheel) as archive:
         names = set(archive.namelist())
         for required in (
-            "traceport/__init__.py",
-            "traceport/py.typed",
-            "traceport/_core/transport.py",
-            "traceport/workflows/__init__.py",
-            "traceport/workflows/runs.py",
-            "traceport/workflows/types.py",
+            "traceport_ai/__init__.py",
+            "traceport_ai/py.typed",
+            "traceport_ai/_core/transport.py",
+            "traceport_ai/workflows/__init__.py",
+            "traceport_ai/workflows/runs.py",
+            "traceport_ai/workflows/types.py",
         ):
             assert required in names, f"wheel is missing {required}"
         assert not any(name.startswith(("tests/", "examples/", ".venv/")) for name in names)

@@ -2,8 +2,8 @@ import json
 from importlib.metadata import version
 from typing import get_args
 
-from traceport import __version__
-from traceport.workflows import (
+from traceport_ai import __version__
+from traceport_ai.workflows import (
     WorkflowBillingMethod,
     WorkflowRun,
     WorkflowRunBilling,
@@ -37,4 +37,4 @@ def test_models_match_shared_contract():
 
 
 def test_version_matches_installed_distribution():
-    assert __version__ == version("traceport")
+    assert __version__ == version("traceport-ai")

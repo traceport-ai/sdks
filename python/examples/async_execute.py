@@ -3,15 +3,15 @@
 import asyncio
 import os
 
-from traceport import AsyncTraceport
-from traceport.workflows import AsyncWorkflows
+from traceport_ai import AsyncTraceport
+from traceport_ai.workflows import AsyncWorkflows
 
 
 async def main() -> None:
     async with AsyncTraceport() as client:
         workflows = AsyncWorkflows(client)
         result = await workflows.execute(
-            version_id=os.environ["TRACEPORT_VERSION_ID"],
+            deployment=os.environ["TRACEPORT_DEPLOYMENT"],
             input={"question": "What is Traceport?"},
         )
         print(result.status, result.output, result.error)

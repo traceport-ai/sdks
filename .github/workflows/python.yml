@@ -47,7 +47,7 @@ jobs:
       - run: uv run --locked --all-extras ruff check .
       - run: uv run --locked --all-extras ruff format --check .
       - run: uv run --locked --all-extras mypy
-      - run: uv run --locked --all-extras pytest --cov=traceport --cov-report=term-missing
+      - run: uv run --locked --all-extras pytest --cov=traceport_ai --cov-report=term-missing
       - run: uv run --locked --all-extras python -m compileall -q examples
       - run: uv build
       - run: uv run --locked --all-extras twine check dist/*

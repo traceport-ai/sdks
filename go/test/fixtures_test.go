@@ -148,15 +148,16 @@ func replayFixture(t *testing.T, fixture fixture) {
 		return &http.Response{StatusCode: fixture.Response.Status, Header: headers, Body: io.NopCloser(strings.NewReader(string(fixture.Response.Body)))}, nil
 	})
 	var params struct {
-		VersionID string         `json:"configVersionID"`
-		Input     map[string]any `json:"additional"`
+		VersionID  string         `json:"configVersionID"`
+		Deployment string         `json:"deployment"`
+		Input      map[string]any `json:"additional"`
 	}
 	if len(fixture.Request.Body) > 0 {
 		if err := json.Unmarshal(fixture.Request.Body, &params); err != nil {
 			t.Fatal(err)
 		}
 	}
-	start := workflows.StartParams{VersionID: params.VersionID, Input: params.Input}
+	start := workflows.StartParams{VersionID: params.VersionID, Deployment: params.Deployment, Input: params.Input}
 	var options []traceport.RequestOption
 	if key := fixture.Request.Headers["Idempotency-Key"]; key != "" {
 		options = append(options, traceport.WithIdempotencyKey(key))
@@ -175,7 +176,7 @@ func replayFixture(t *testing.T, fixture fixture) {
 		run, err = workflows.New(client).Runs.Get(context.Background(), filepath.Base(parsed.Path))
 	case "listWorkflowRuns":
 		query := parsed.Query()
-		params := workflows.ListRunsParams{VersionID: query.Get("configVersionID"), Status: workflows.RunStatus(query.Get("status"))}
+		params := workflows.ListRunsParams{VersionID: query.Get("configVersionID"), Deployment: query.Get("deployment"), Status: workflows.RunStatus(query.Get("status"))}
 		if query.Has("limit") {
 			value, _ := strconv.Atoi(query.Get("limit"))
 			params.Limit = &value

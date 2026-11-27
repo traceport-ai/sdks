@@ -2,8 +2,8 @@
 
 import os
 
-from traceport import Traceport
-from traceport.workflows import WaitTimeoutError, Workflows, require_output
+from traceport_ai import Traceport
+from traceport_ai.workflows import WaitTimeoutError, Workflows, require_output
 
 
 def main() -> None:

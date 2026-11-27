@@ -1201,7 +1201,7 @@ wheels = [
 ]
 
 [[package]]
-name = "traceport"
+name = "traceport-ai"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },

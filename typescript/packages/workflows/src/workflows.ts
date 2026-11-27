@@ -7,7 +7,7 @@
  *
  * const client = new Traceport();
  * const workflows = new Workflows(client);
- * const result = await workflows.execute({ versionId, input: { question: "Hi" } });
+ * const result = await workflows.execute({ deployment: "support-triage-prod", input: { question: "Hi" } });
  */
 
 import type { MutationRequestOptions, Traceport } from "@traceport/core";

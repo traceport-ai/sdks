@@ -1,0 +1,129 @@
+{
+  "name": "workflows.execute.by_deployment_succeeded",
+  "description": "Execute by deployment code instead of version ID; the response is the same workflow result.",
+  "operation": "executeWorkflow",
+  "source": {
+    "kind": "derived",
+    "from": "traceport-apis@bf9256751d71 feat/workflow_deployment (uncommitted MGMT-08 changes): internal/transport/http/handlers/server/handler.go, internal/transport/http/handlers/server/workflow_runs.go, internal/transport/http/handlers/shared/errors.go, internal/usecase/executions/usecase.go, internal/transport/http/dto/workflow_run.go. Replace with a recording once a server runs this build."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/workflow/execute",
+    "headers": {
+      "Idempotency-Key": "fixture-exec-1"
+    },
+    "body": {
+      "deployment": "support-triage-prod",
+      "additional": {
+        "question": "SDK fixture answer",
+        "payload": {}
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": {
+        "data": {
+          "agent": {},
+          "api_connector": {},
+          "branch": {},
+          "final": {
+            "answer": "SDK fixture answer"
+          },
+          "guardrail": {},
+          "input": {
+            "payload": {},
+            "question": "SDK fixture answer"
+          },
+          "mcp_tool": {},
+          "router": {},
+          "transform": {
+            "prepare": {
+              "result": {
+                "answer": "SDK fixture answer"
+              }
+            }
+          }
+        },
+        "error": "",
+        "steps": [
+          {
+            "index": 0,
+            "nodeId": "Start",
+            "name": "Start",
+            "type": "start",
+            "attempt": 1,
+            "status": "completed",
+            "startedAt": "2026-11-13T13:21:39.773425585Z",
+            "durationMs": 0,
+            "input": {
+              "input": {
+                "payload": {},
+                "question": "SDK fixture answer"
+              }
+            },
+            "output": {
+              "payload": {},
+              "question": "SDK fixture answer"
+            }
+          },
+          {
+            "index": 1,
+            "nodeId": "00000000-0000-4000-8000-000000000003",
+            "name": "prepare",
+            "type": "transform",
+            "attempt": 1,
+            "status": "completed",
+            "startedAt": "2026-11-13T13:21:39.773663001Z",
+            "durationMs": 0,
+            "input": {
+              "answer": "SDK fixture answer"
+            },
+            "output": {
+              "answer": "SDK fixture answer"
+            },
+            "previousNodeIds": [
+              "Start"
+            ]
+          },
+          {
+            "index": 2,
+            "nodeId": "00000000-0000-4000-8000-000000000004",
+            "name": "end",
+            "type": "end",
+            "attempt": 1,
+            "status": "completed",
+            "startedAt": "2026-11-13T13:21:39.773737251Z",
+            "durationMs": 0,
+            "input": {
+              "answer": "SDK fixture answer"
+            },
+            "output": {
+              "answer": "SDK fixture answer"
+            },
+            "previousNodeIds": [
+              "00000000-0000-4000-8000-000000000003"
+            ]
+          }
+        ]
+      },
+      "error": "",
+      "status": 200,
+      "errorCode": ""
+    }
+  },
+  "expect": {
+    "kind": "outcome",
+    "outcome": {
+      "status": "succeeded",
+      "output": {
+        "answer": "SDK fixture answer"
+      },
+      "stepCount": 3
+    }
+  }
+}

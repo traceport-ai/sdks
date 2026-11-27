@@ -63,6 +63,8 @@ class WorkflowRun(_Model):
 
     id: str = Field(min_length=1)
     config_version_id: str = Field(alias="configVersionID", min_length=1)
+    #: Deployment code the run was started through; None when started by version ID.
+    deployment: str | None = None
     revision: int = Field(ge=0)
     status: WorkflowRunStatus
     mode: WorkflowRunMode

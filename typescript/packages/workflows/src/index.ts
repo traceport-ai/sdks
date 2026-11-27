@@ -27,5 +27,7 @@ export type {
   WorkflowRunPage,
   WorkflowRunStatus,
   WorkflowStartParams,
+  WorkflowStartByDeployment,
+  WorkflowStartByVersion,
   WorkflowStep,
 } from "./types.js";

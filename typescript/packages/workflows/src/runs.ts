@@ -118,6 +118,7 @@ export class Runs {
       path: "/workflow/runs",
       query: {
         configVersionID: params.versionId,
+        deployment: params.deployment,
         status: params.status,
         limit: params.limit,
         offset: params.offset,

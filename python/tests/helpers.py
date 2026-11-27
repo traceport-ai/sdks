@@ -9,8 +9,8 @@ from pathlib import Path
 
 import httpx
 
-from traceport import AsyncTraceport, Traceport
-from traceport.workflows import AsyncWorkflows, Workflows
+from traceport_ai import AsyncTraceport, Traceport
+from traceport_ai.workflows import AsyncWorkflows, Workflows
 
 REPO = Path(__file__).resolve().parents[2]
 VERSION_ID = "00000000-0000-4000-8000-000000000001"
