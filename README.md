@@ -12,7 +12,7 @@ URL, timeouts and retries are configured once. Adding a product later never need
 | ---------- | ----------------------------------------------- | ------------------------------------------- | -------------------------------------------------- |
 | TypeScript | `@traceport/core`                               | `@traceport/workflows`                      | 0.0.1 on npm                                       |
 | Go         | `github.com/traceport-ai/sdks/go` (`traceport`) | `github.com/traceport-ai/sdks/go/workflows` | 0.0.1, tag `go/v0.0.1`                             |
-| Python     | `traceport-ai` (import `traceport_ai`)          | `traceport_ai.workflows`                    | Sync/async implemented; not yet on PyPI            |
+| Python     | `traceport-ai` (import `traceport_ai`)          | `traceport_ai.workflows`                    | 0.0.1 on PyPI                                      |
 
 Docs: [TypeScript](./typescript/README.md) · [Go](./go/README.md) ([changelog](./go/CHANGELOG.md)) · [Python](./python/README.md) ([changelog](./python/CHANGELOG.md)). TypeScript packages each have their own README and changelog under `typescript/packages/`.
 

@@ -1,9 +1,9 @@
 # Changelog
 
-## 0.0.1 (Unreleased)
+## 0.0.1
 
 Initial release of `traceport-ai` (import `traceport_ai`): the shared clients in `traceport_ai` and the workflows product in
-`traceport_ai.workflows`. This version has not been published.
+`traceport_ai.workflows`.
 
 ### Clients and configuration
 
