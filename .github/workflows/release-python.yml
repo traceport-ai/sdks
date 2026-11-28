@@ -1,0 +1,155 @@
+# Publishes `traceport-ai` to PyPI from a `python/v<version>` tag.
+#
+# The `build` job checks the tag, reruns every Python check and builds the wheel and sdist once,
+# without any publishing permission. The `publish` job waits for approval in the protected
+# `release` environment and uploads exactly those files through PyPI trusted publishing (OIDC),
+# so no PyPI token is stored anywhere. The publish action also uploads signed attestations
+# that link each file to this workflow run.
+name: release-python
+
+on:
+  push:
+    tags:
+      - "python/v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-python-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: python
+
+jobs:
+  build:
+    name: build ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+      published: ${{ steps.registry.outputs.published }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check the tag matches the package version
+        id: tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#python/v}"
+          # A plain release (1.2.3) or a PEP 440 pre-release (1.2.3a1, 1.2.3b1, 1.2.3rc1).
+          if ! printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$'; then
+            echo "::error::$TAG is not python/v<version>, for example python/v0.0.2"
+            exit 1
+          fi
+          declared="$(grep -E '^__version__ = "' src/traceport_ai/_version.py | cut -d'"' -f2)"
+          if [ "$declared" != "$version" ]; then
+            echo "::error::$TAG does not match __version__ \"$declared\" in python/src/traceport_ai/_version.py"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Check the tag is on main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::${GITHUB_REF_NAME} points at a commit that is not on main"
+            exit 1
+          fi
+      - name: Check whether PyPI already has this version
+        id: registry
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          status="$(curl -s -o /dev/null -w '%{http_code}' "https://pypi.org/pypi/traceport-ai/${VERSION}/json")"
+          if [ "$status" = "200" ]; then
+            echo "::notice::traceport-ai ${VERSION} is already on PyPI; nothing to publish"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - run: python -m pip install uv==0.13.8
+      - run: uv sync --locked --all-extras --python python
+      - run: uv run --locked --all-extras ruff check .
+      - run: uv run --locked --all-extras ruff format --check .
+      - run: uv run --locked --all-extras mypy
+      - run: uv run --locked --all-extras pytest
+      - name: Build the wheel and sdist
+        run: |
+          rm -rf dist
+          uv build
+      - run: uv run --locked --all-extras twine check --strict dist/*
+      - run: uv run --locked --all-extras python scripts/check_package.py dist/*.whl
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: python-dist
+          path: python/dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: publish traceport-ai ${{ needs.build.outputs.version }}
+    needs: build
+    if: needs.build.outputs.published != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: release
+      url: https://pypi.org/project/traceport-ai/${{ needs.build.outputs.version }}/
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: python-dist
+          path: dist/
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: dist/
+
+  confirm:
+    name: install traceport-ai ${{ needs.build.outputs.version }}
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
+      - name: Install the release from PyPI in a new environment
+        working-directory: ${{ runner.temp }}
+        # PyPI can take a moment to serve a new version, so retry the install.
+        run: |
+          python -m venv consumer
+          for attempt in 1 2 3 4 5 6; do
+            if consumer/bin/pip install --no-cache-dir "traceport-ai==${VERSION}"; then
+              break
+            fi
+            if [ "$attempt" = 6 ]; then
+              echo "::error::could not install traceport-ai==${VERSION} from PyPI"
+              exit 1
+            fi
+            sleep 15
+          done
+          consumer/bin/python - <<'EOF'
+          import os
+
+          from traceport_ai import AsyncTraceport, Traceport, __version__
+          from traceport_ai.workflows import AsyncWorkflows, Workflows
+
+          Workflows(Traceport(api_key="tp_release_check"))
+          AsyncWorkflows(AsyncTraceport(api_key="tp_release_check"))
+          assert __version__ == os.environ["VERSION"], __version__
+          print(f"traceport-ai {__version__} installs and imports")
+          EOF

@@ -3,9 +3,9 @@
 Python 3.11+ Traceport SDK with synchronous `Traceport` and AsyncIO `AsyncTraceport`
 clients. The only direct runtime dependencies are HTTPX and Pydantic 2.
 
-**0.0.1 pre-release, unpublished.** The distribution name is `traceport-ai` and the import name is `traceport_ai` (the PyPI
-name `traceport_ai` belongs to an unrelated project); registry
-ownership, live-server conformance and publication remain release gates.
+**Status: 0.0.1, early release.** The API may change before 1.0. Install `traceport-ai` and
+import `traceport_ai`. The PyPI package named `traceport` (without `-ai`) is an unrelated
+project.
 
 The SDK is modular: one shared client and a subpackage per product. Every product takes
 the same client, so the API key, base URL, timeouts and retries are configured once.
@@ -24,17 +24,16 @@ supports workflow execution and durable runs; document parsing, Human input, eve
 and workflow cancellation are not included. See the [changelog](https://github.com/traceport-ai/sdks/blob/main/python/CHANGELOG.md)
 for the complete first-release feature set.
 
-## Install locally
+## Install
 
-From `sdks/python/`, using Python 3.11 or later:
+Using Python 3.11 or later:
 
 ```sh
-python -m pip install .
+python -m pip install traceport-ai
 ```
 
-You can also install a locally built wheel with
-`python -m pip install /absolute/path/to/sdks/python/dist/traceport_ai-0.0.1-py3-none-any.whl`.
-After publication, installation will be `python -m pip install traceport-ai`.
+To try unreleased changes, install from a checkout instead: run `python -m pip install .` in
+`sdks/python/`.
 
 For development, use the checked-in dependency lock:
 

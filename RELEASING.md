@@ -42,4 +42,15 @@ If the workflow fails before its `announce` job, delete the tag (`git push origi
 
 ## Python package
 
-Not set up yet. It will publish `traceport-ai` from a `python/v*` tag through PyPI trusted publishing, behind the same `release` environment.
+`release-python.yml` publishes `traceport-ai` from a `python/v<version>` tag through PyPI trusted publishing. The trusted publisher was registered on PyPI as a pending publisher before the first release, so even `0.0.1` was published by the workflow.
+
+1. Bump `__version__` in `python/src/traceport_ai/_version.py` (use PEP 440 forms such as `0.0.2` or `0.1.0rc1`), add the release to `python/CHANGELOG.md`, open a pull request and merge it into `main`.
+2. Tag the merge commit on `main` and push the tag:
+
+   ```sh
+   git tag python/v0.0.2 && git push origin python/v0.0.2
+   ```
+
+3. Approve the `release` environment in the Actions run. The `build` job refuses tags that are not on `main` or whose version differs from `__version__`, reruns every Python check and builds the wheel and sdist without publishing permissions. The `publish` job uploads exactly those files with signed attestations, and the `confirm` job installs the release from PyPI and imports it. Versions already on PyPI are skipped.
+
+PyPI never accepts the same version twice, even after a release is deleted. If a release is broken, yank it on PyPI (installers then skip it unless it is pinned exactly) and publish the next version.
